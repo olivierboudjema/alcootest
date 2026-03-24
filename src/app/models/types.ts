@@ -20,7 +20,7 @@ export interface Alcool {
     nom: string;
     type: 'cocktail' | 'vin' | 'biere' | 'spiritueux pur' | 'champagne';
     degre: number;
-    quantite: number;
+    quantite: number; // Volume en mL
 }
 
 // Consommation d'un verre dans une soirée (combine alcool + soiree_alcool)

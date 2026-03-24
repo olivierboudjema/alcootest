@@ -18,11 +18,10 @@ export class CalculService {
 
     /**
      * Calcule l'alcool pur en grammes
-     * Alcool pur (g) = Volume(ml) × (Degre/100) × 0.8
+     * Alcool pur (g) = Volume(mL) × (Degre/100) × 0.8
+     * quantite est stockée en mL dans la DB
      */
-    private calculatePureAlcohol(volumeCl: number, degre: number): number {
-        // quantite est stockée en cL dans la DB → conversion en mL
-        const volumeMl = volumeCl * 10;
+    private calculatePureAlcohol(volumeMl: number, degre: number): number {
         return volumeMl * (degre / 100) * 0.8;
     }
 
