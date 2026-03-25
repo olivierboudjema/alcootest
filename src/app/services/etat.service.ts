@@ -77,7 +77,7 @@ export class EtatService {
                 },
                 {
                     level: "1.4",
-                    status: "Grand seducteur."
+                    status: "Maître tunnelier."
                 },
                 {
                     level: "1.5",

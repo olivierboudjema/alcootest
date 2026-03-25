@@ -14,6 +14,7 @@ import { SupabaseService } from '../../services/supabase.service';
 import { CalculService } from '../../services/calcul.service';
 import { StorageService } from '../../services/storage.service';
 import { EtatService } from '../../services/etat.service';
+import { RoastService } from '../../services/roast.service';
 import { ConsommationAlcool, UserProfile, AlcoholeDataPoint } from '../../models/types';
 import { Subject, interval } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -135,7 +136,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private calcul = inject(CalculService);
   private storage = inject(StorageService);
   private etat = inject(EtatService);
+  private roast = inject(RoastService);
   private router = inject(Router);
+
+  private roastLoaded = false;
 
   // Signaux
   currentSoireeName = signal('');
@@ -218,10 +222,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
       if (soireeId !== null) {
         this.drinks = await this.supabase.getDrinksBySoiree(soireeId);
         this.updateChartData();
+        this.refreshRoast();
       }
     } catch (error) {
       console.error('Erreur chargement consommations:', error);
     }
+  }
+
+  private async refreshRoast() {
+    const taux = parseFloat(this.currentTaux());
+    const phrase = await this.roast.generateRoast(
+      this.activeUsername(),
+      this.currentSoireeName(),
+      this.drinks,
+      taux
+    );
+    this.etatDetaille.set(phrase);
+    this.roastLoaded = true;
   }
 
   goToAddDrink() {
@@ -258,6 +275,51 @@ export class DashboardComponent implements OnInit, OnDestroy {
         chart.ctx.textBaseline = 'top';
         chart.ctx.fillText(label, chart.chartArea.left + 4, chart.chartArea.top + 4);
         chart.ctx.restore();
+      }
+    };
+
+    const drinksPlugin = {
+      id: `drinks_${Math.random()}`,
+      afterDatasetsDraw(chart: any) {
+        if (component.drinks.length === 0 || component.dataPoints.length === 0) return;
+
+        const firstDrinkMs = component.drinks.reduce((e: any, d: any) =>
+          d.heure_consomation < e.heure_consomation ? d : e
+        ).heure_consomation.getTime();
+
+        const xScale = chart.scales['x'];
+        const yScale = chart.scales['y'];
+        const ctx = chart.ctx;
+
+        const emojiMap: Record<string, string> = {
+          vin: '🍷', champagne: '🍷', biere: '🍺',
+          cocktail: '🍹', 'spiritueux pur': '🥃', shot: '🔥',
+        };
+        // Dernier emoji par index (si plusieurs verres au même instant)
+        const emojiByIndex: Record<number, { emoji: string }> = {};
+        for (const drink of component.drinks) {
+          const timeH = (drink.heure_consomation.getTime() - firstDrinkMs) / 3600000;
+          let idx = 0, minDiff = Math.abs(component.dataPoints[0].time - timeH);
+          for (let i = 1; i < component.dataPoints.length; i++) {
+            const diff = Math.abs(component.dataPoints[i].time - timeH);
+            if (diff < minDiff) { minDiff = diff; idx = i; }
+          }
+          emojiByIndex[idx] = { emoji: emojiMap[drink.type] ?? '🍶' };
+        }
+
+        ctx.save();
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        for (const [idxStr, { emoji }] of Object.entries(emojiByIndex)) {
+          const idx = Number(idxStr);
+          const xPos = xScale.getPixelForValue(idx);
+          const taux = component.dataPoints[idx]?.taux ?? 0;
+          const yPos = yScale.getPixelForValue(taux);
+          ctx.fillText(emoji, xPos, yPos - 14);
+        }
+        ctx.restore();
       }
     };
 
@@ -367,7 +429,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           },
         },
       },
-      plugins: [datePlugin, redLinePlugin], // plugins locaux à cette instance, pas globaux
+      plugins: [datePlugin, drinksPlugin, redLinePlugin], // plugins locaux à cette instance, pas globaux
     };
 
     try {
@@ -433,7 +495,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.currentTaux.set(selectedPoint.taux.toFixed(2));
       this.imageUrl.set(this.etat.getImageByTaux(selectedPoint.taux));
       const etatAlcool = this.etat.getEtatByTaux(selectedPoint.taux);
-      this.etatDetaille.set(etatAlcool.status);
+      if (!this.roastLoaded) this.etatDetaille.set(etatAlcool.status);
       this.emoji.set(this.calcul.getEmoji(selectedPoint.taux));
       this.statusDescription.set(this.calcul.getStatusDescription(selectedPoint.taux));
 
@@ -510,7 +572,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.emoji.set(this.calcul.getEmoji(displayTaux));
     this.imageUrl.set(this.etat.getImageByTaux(displayTaux));
     const etatAlcool = this.etat.getEtatByTaux(displayTaux);
-    this.etatDetaille.set(etatAlcool.status);
+    if (!this.roastLoaded) this.etatDetaille.set(etatAlcool.status);
 
     // Labels en heure réelle (heure du premier verre + offset)
     const firstDrinkMs = this.drinks.length > 0

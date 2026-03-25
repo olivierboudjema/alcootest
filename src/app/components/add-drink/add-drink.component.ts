@@ -261,8 +261,9 @@ export class AddDrinkComponent implements OnInit {
         this.supabase.getDrinksBySoiree(Number(soireeIdStr)),
       ]);
 
+      const parseUTC = (s: string) => new Date(/Z|[+-]\d{2}:?\d{2}$/.test(s) ? s : s + 'Z');
       const startMs = soiree.created_at
-        ? new Date(soiree.created_at).getTime()
+        ? parseUTC(soiree.created_at).getTime()
         : Date.now() - 8 * 60 * 60 * 1000;
       const nowMs = Date.now();
       const maxMs = nowMs + 12 * 60 * 60 * 1000;
@@ -394,7 +395,7 @@ export class AddDrinkComponent implements OnInit {
   getEmojiForType(type: string): string {
     const map: Record<string, string> = {
       champagne: '🍷', vin: '🍷', cocktail: '🍹',
-      'spiritueux pur': '🥃', biere: '🍺', shot: '🥃',
+      'spiritueux pur': '🥃', biere: '🍺', shot: '🔥',
     };
     return map[type] ?? '🍶';
   }

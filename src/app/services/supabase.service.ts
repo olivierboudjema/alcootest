@@ -46,6 +46,14 @@ export class SupabaseService {
     }
 
     // SOIREES
+    // Force l'interprétation UTC d'une date Supabase (évite le double décalage horaire)
+    private parseUTC(dateStr: string): Date {
+        if (!dateStr) return new Date();
+        // Si pas de timezone info, ajouter Z pour forcer UTC
+        const str = /Z|[+-]\d{2}:?\d{2}$/.test(dateStr) ? dateStr : dateStr + 'Z';
+        return new Date(str);
+    }
+
     async createSoiree(name: string, creator: string, startTime?: Date): Promise<Soiree> {
         const payload: any = { name, creator };
         if (startTime) payload.created_at = startTime.toISOString();
@@ -59,7 +67,6 @@ export class SupabaseService {
             console.error('Supabase Error (createSoiree):', error);
             throw new Error(`Impossible de créer la soirée: ${error.message}`);
         }
-        console.log('Soiree créée:', data);
         return data;
     }
 
@@ -115,7 +122,7 @@ export class SupabaseService {
             .single();
 
         if (error) throw error;
-        return { ...data, heure_consomation: new Date(data.heure_consomation) };
+        return { ...data, heure_consomation: this.parseUTC(data.heure_consomation) };
     }
 
     async getDrinksBySoiree(soiree_id: number): Promise<ConsommationAlcool[]> {
@@ -132,8 +139,7 @@ export class SupabaseService {
 
         if (error) throw error;
 
-        console.log(`Alcools consommés pour la soirée ${soiree_id}:`, data);
-        
+
         return (data || []).map((item: any): ConsommationAlcool => ({
             id: item.alcool.id,
             soiree_alcool_id: item.id, // id de la ligne soiree_alcool
@@ -142,8 +148,8 @@ export class SupabaseService {
             degre: item.alcool.degre,
             quantite: item.alcool.quantite,
             soiree_id: item.soiree_id,
-            heure_consomation: new Date(item.heure_consomation),
-            heure_consommation: new Date(item.heure_consomation),
+            heure_consomation: this.parseUTC(item.heure_consomation),
+            heure_consommation: this.parseUTC(item.heure_consomation),
         }));
     }
 

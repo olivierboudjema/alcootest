@@ -55,7 +55,7 @@ import { Soiree } from '../../models/types';
     <!-- Overlay formulaire (plein écran, scrollable) -->
     @if (showNewSoireeForm || showLoadSoiree) {
       <div class="fixed inset-0 z-50 bg-gradient-to-b from-blue-900 to-purple-900 overflow-y-auto">
-        <div class="max-w-md mx-auto p-6 min-h-full flex flex-col justify-center">
+        <div class="max-w-md mx-auto p-6 min-h-full flex flex-col justify-center overflow-hidden">
 
           @if (showNewSoireeForm) {
             <h2 class="text-white text-xl font-bold mb-4">Nouvelle soirée</h2>
@@ -73,7 +73,8 @@ import { Soiree } from '../../models/types';
               class="w-full px-3 py-2 bg-slate-700 text-white placeholder-gray-400 rounded border border-slate-600 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400" />
 
             <input type="time" [(ngModel)]="formData.startTime"
-              class="w-full px-3 py-2 bg-slate-700 text-yellow-400 font-bold text-lg rounded border border-slate-600 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              class="w-full min-w-0 px-3 py-2 bg-slate-700 text-yellow-400 font-bold rounded border border-slate-600 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              style="font-size: 16px; max-width: 100%; box-sizing: border-box;" />
 
             <select [(ngModel)]="formData.sexe"
               class="w-full px-3 py-2 bg-slate-700 text-white rounded border border-slate-600 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
