@@ -18,7 +18,7 @@ export interface Soiree {
 export interface Alcool {
     id: number;
     nom: string;
-    type: 'cocktail' | 'vin' | 'biere' | 'spiritueux pur' | 'champagne';
+    type: 'cocktail' | 'vin' | 'biere' | 'spiritueux pur' | 'champagne' | 'shot';
     degre: number;
     quantite: number; // Volume en mL
 }

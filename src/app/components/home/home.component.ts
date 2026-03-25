@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../../services/supabase.service';
@@ -158,6 +158,7 @@ export class HomeComponent implements OnInit {
   private supabase = inject(SupabaseService);
   private storage = inject(StorageService);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
 
   formData = {
     username: '',
@@ -174,6 +175,8 @@ export class HomeComponent implements OnInit {
     if (currentSoireeId) {
       this.router.navigate(['/dashboard']);
     }
+
+    if (!isPlatformBrowser(this.platformId)) return;
 
     // Android : écouter l'event d'installation
     window.addEventListener('beforeinstallprompt', (e: any) => {

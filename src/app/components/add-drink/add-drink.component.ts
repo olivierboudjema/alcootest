@@ -192,10 +192,10 @@ export class AddDrinkComponent implements OnInit {
   private router = inject(Router);
 
   readonly categories: DrinkCategory[] = [
-    { key: 'champagne', label: 'Champagne', emoji: '🍾', types: ['champagne'] },
-    { key: 'vin',       label: 'Vin',       emoji: '🍷', types: ['vin'] },
-    { key: 'cocktail',  label: 'Cocktails', emoji: '🍹', types: ['cocktail', 'spiritueux pur'] },
-    { key: 'biere',     label: 'Bière',     emoji: '🍺', types: ['biere'] },
+    { key: 'vin',      label: 'Vin',       emoji: '🍷', types: ['vin', 'champagne'] },
+    { key: 'biere',    label: 'Bière',     emoji: '🍺', types: ['biere'] },
+    { key: 'cocktail', label: 'Cocktails', emoji: '🍹', types: ['cocktail', 'spiritueux pur'] },
+    { key: 'shot',     label: 'Shots',     emoji: '🔥', types: ['shot'] },
   ];
 
   drinksByCategory: Record<string, Alcool[]> = {};
@@ -387,8 +387,8 @@ export class AddDrinkComponent implements OnInit {
 
   getEmojiForType(type: string): string {
     const map: Record<string, string> = {
-      champagne: '🍾', vin: '🍷', cocktail: '🍹',
-      'spiritueux pur': '🥃', biere: '🍺',
+      champagne: '🍷', vin: '🍷', cocktail: '🍹',
+      'spiritueux pur': '🥃', biere: '🍺', shot: '🥃',
     };
     return map[type] ?? '🍶';
   }
