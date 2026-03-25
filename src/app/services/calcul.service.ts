@@ -69,11 +69,10 @@ export class CalculService {
                 drink.heure_consommation
             );
 
-            // Délai d'absorption
+            // Le verre est absorbé instantanément au moment de la consommation
             const absorptionStartTime = timeFromFirstDrink + delaiAbsorption;
-            const absorptionDuration = 30; // minutes (approximatif)
 
-            // Calcul du taux au moment du pic (fin d'absorption)
+            // Calcul du taux au moment du pic
             const pureAlcohol = this.calculatePureAlcohol(
                 drink.quantite,
                 drink.degre
@@ -85,17 +84,8 @@ export class CalculService {
                 return;
             }
 
-            // Absorption progressive
-            if (timeInMinutes <= absorptionStartTime + absorptionDuration) {
-                const fractionAbsorbee =
-                    (timeInMinutes - absorptionStartTime) / absorptionDuration;
-                totalTaux += peakTaux * fractionAbsorbee;
-                return;
-            }
-
-            // Temps écoulé après absorption complète
-            const elapsedAfterAbsorption =
-                timeInMinutes - (absorptionStartTime + absorptionDuration);
+            // Élimination directement depuis le pic
+            const elapsedAfterAbsorption = timeInMinutes - absorptionStartTime;
             const elimination =
                 (elapsedAfterAbsorption / 60) * this.ELIMINATION_RATE;
             const drinkTaux = Math.max(0, peakTaux - elimination);

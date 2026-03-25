@@ -80,7 +80,7 @@ import { takeUntil } from 'rxjs/operators';
           </div>
           
           <!-- Chart -->
-          <div class="h-64 w-full">
+          <div class="h-[230px] w-full">
             <canvas
               id="alcoholChart"
               #chartCanvas
@@ -101,7 +101,7 @@ import { takeUntil } from 'rxjs/operators';
           <img
             [src]="imageUrl()"
             alt="État d'alcool"
-            class="w-full h-48 object-contain rounded-lg mb-3"
+            class="w-full h-[172px] object-contain rounded-lg mb-3"
           />
           <p class="text-sm italic text-yellow-300">{{ etatDetaille() }}</p>
         </div>
@@ -425,7 +425,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               callback: (value) => `${value}`,
             },
             min: 0,
-            max: 2.5,
+            max: 2,
           },
         },
       },
