@@ -24,7 +24,7 @@ interface DrinkCategory {
   imports: [CommonModule],
   template: `
     <div class="h-dvh bg-gradient-to-b from-slate-900 to-slate-800 overflow-y-auto p-4 pb-8"
-         style="padding-top: max(1rem, env(safe-area-inset-top))" #scrollContainer>
+         style="padding-top: max(1rem, env(safe-area-inset-top)); -webkit-overflow-scrolling: touch" #scrollContainer>
 
       <!-- Header -->
       <div class="max-w-md mx-auto mb-6 flex items-center gap-3 text-white">

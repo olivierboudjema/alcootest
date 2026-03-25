@@ -24,8 +24,8 @@ import { takeUntil } from 'rxjs/operators';
   imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="h-full overflow-y-auto bg-gradient-to-b from-slate-900 to-slate-800 p-4"
-         style="padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: max(2rem, env(safe-area-inset-bottom))">
+    <div class="h-dvh overflow-y-auto bg-gradient-to-b from-slate-900 to-slate-800 p-4"
+         style="padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: max(2rem, env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch">
       <!-- Compact Header with Profile -->
       <div class="max-w-md mx-auto mb-3 text-white">
         <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-2 rounded-lg border border-blue-500/20">
