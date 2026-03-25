@@ -11,19 +11,24 @@ export class RoastService {
     private http = inject(HttpClient);
     private etat = inject(EtatService);
     private platformId = inject(PLATFORM_ID);
-    private expressionsCache: string | null = null;
+    private expressionsCache: string[] | null = null;
 
-    private async loadExpressions(): Promise<string> {
+    private async loadExpressions(): Promise<string[]> {
         if (this.expressionsCache) return this.expressionsCache;
         try {
             const text = await firstValueFrom(
                 this.http.get('/assets/expressions.txt', { responseType: 'text' })
             );
-            this.expressionsCache = text;
-            return text;
+            this.expressionsCache = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            return this.expressionsCache;
         } catch {
-            return '';
+            return [];
         }
+    }
+
+    private pickRandom(arr: string[], n: number): string[] {
+        const shuffled = [...arr].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, n);
     }
 
     async generateRoast(
@@ -41,7 +46,8 @@ export class RoastService {
         if (!apiKey) return fallback;
 
         try {
-            const expressions = await this.loadExpressions();
+            const allExpressions = await this.loadExpressions();
+            const expressions = this.pickRandom(allExpressions, 17).join('\n');
 
             const drinkSummary = drinks.length === 0
                 ? 'Aucun verre pour l\'instant.'
