@@ -387,19 +387,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             display: false,
           },
           tooltip: {
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            titleColor: '#fff',
-            bodyColor: '#fff',
-            borderColor: '#00ff00',
-            borderWidth: 1,
-            padding: 8,
-            titleFont: { size: 12 },
-            bodyFont: { size: 11 },
-            callbacks: {
-              label: (context) => {
-                return `Taux: ${(context.parsed?.y || 0).toFixed(2)}g/L`;
-              },
-            },
+            enabled: false,
           },
         },
         scales: {
