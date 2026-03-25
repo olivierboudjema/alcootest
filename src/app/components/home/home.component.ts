@@ -20,6 +20,24 @@ import { Soiree } from '../../models/types';
           <p class="text-blue-200">Suivi d'alcoolémie en temps réel</p>
         </div>
 
+        <!-- Install Button (Android) -->
+        @if (showInstallButton()) {
+          <button
+            (click)="installApp()"
+            class="w-full mb-4 bg-white/10 border border-white/30 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 hover:bg-white/20 transition"
+          >
+            <span>📲</span> Installer sur l'écran d'accueil
+          </button>
+        }
+
+        <!-- Install Instructions (iPhone) -->
+        @if (showIosInstructions()) {
+          <div class="mb-4 bg-white/10 border border-white/30 text-white p-3 rounded-lg text-sm text-center">
+            <p class="font-semibold mb-1">📲 Installer sur iPhone</p>
+            <p class="text-blue-200">Appuie sur <span class="font-bold">Partager</span> puis <span class="font-bold">"Sur l'écran d'accueil"</span></p>
+          </div>
+        }
+
         <!-- Buttons -->
         <div class="space-y-4">
           <button
@@ -151,6 +169,10 @@ export class HomeComponent implements OnInit {
   soirees: Soiree[] | null = null;
   searchUsername = '';
 
+  showInstallButton = signal(false);
+  showIosInstructions = signal(false);
+  private installPrompt: any = null;
+
   private supabase = inject(SupabaseService);
   private storage = inject(StorageService);
   private router = inject(Router);
@@ -166,10 +188,32 @@ export class HomeComponent implements OnInit {
   };
 
   ngOnInit() {
-    // Vérifier s'il y a une soirée en cours
     const currentSoireeId = this.storage.getCurrentSoiree();
     if (currentSoireeId) {
       this.router.navigate(['/dashboard']);
+    }
+
+    // Android : écouter l'event d'installation
+    window.addEventListener('beforeinstallprompt', (e: any) => {
+      e.preventDefault();
+      this.installPrompt = e;
+      this.showInstallButton.set(true);
+    });
+
+    // iPhone : détecter Safari iOS hors PWA
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = (window.navigator as any).standalone === true;
+    if (isIos && !isStandalone) {
+      this.showIosInstructions.set(true);
+    }
+  }
+
+  async installApp() {
+    if (!this.installPrompt) return;
+    this.installPrompt.prompt();
+    const { outcome } = await this.installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      this.showInstallButton.set(false);
     }
   }
 
