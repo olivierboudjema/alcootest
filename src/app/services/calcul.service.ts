@@ -117,14 +117,13 @@ export class CalculService {
     generateGraphData(
         drinks: ConsommationAlcool[],
         userProfile: UserProfile,
-        durationHours: number = 8,
-        currentTimeFromFirstDrinkMinutes: number = 0
+        maxDurationHours: number = 24,
     ): AlcoholeDataPoint[] {
         const dataPoints: AlcoholeDataPoint[] = [];
-        // Couvrir toute l'histoire (depuis le premier verre) + la projection future
-        const totalMinutes = currentTimeFromFirstDrinkMinutes + durationHours * 60;
+        const totalMinutes = maxDurationHours * 60;
+        let hasSeenNonZero = false;
 
-        // Un point tous les 5 minutes, depuis le premier verre (i=0) jusqu'à la fin
+        // Un point tous les 5 minutes, de t=0 jusqu'au moment où le taux revient à 0
         for (let i = 0; i <= totalMinutes; i += 5) {
             const taux = this.calculateAlcoholLevel(drinks, userProfile, i);
             dataPoints.push({
@@ -132,8 +131,10 @@ export class CalculService {
                 taux: Math.round(taux * 1000) / 1000,
             });
 
-            // N'arrêter que APRÈS le temps actuel pour ne pas tronquer l'historique
-            if (i > currentTimeFromFirstDrinkMinutes && taux <= 0.01) {
+            if (taux > 0.01) hasSeenNonZero = true;
+
+            // Arrêter dès que le taux est retombé à zéro
+            if (hasSeenNonZero && taux <= 0.01) {
                 break;
             }
         }

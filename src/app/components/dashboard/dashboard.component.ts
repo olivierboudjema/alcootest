@@ -236,6 +236,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     // Plugin barre rouge — défini ici pour capturer `this` correctement à chaque création
     const component = this;
+
+    const datePlugin = {
+      id: `dateLabel_${Math.random()}`,
+      afterDatasetsDraw(chart: any) {
+        if (component.drinks.length === 0) return;
+        const firstDrink = component.drinks.reduce((earliest: any, d: any) =>
+          d.heure_consomation < earliest.heure_consomation ? d : earliest
+        );
+        const d = firstDrink.heure_consomation;
+        const day = d.getDate().toString().padStart(2, '0');
+        const month = (d.getMonth() + 1).toString().padStart(2, '0');
+        const year = d.getFullYear().toString().slice(-2);
+        const label = `${day}/${month}/${year}`;
+
+        chart.ctx.save();
+        chart.ctx.font = '10px sans-serif';
+        chart.ctx.fillStyle = 'rgba(180, 180, 180, 0.7)';
+        chart.ctx.textAlign = 'left';
+        chart.ctx.textBaseline = 'top';
+        chart.ctx.fillText(label, chart.chartArea.left + 4, chart.chartArea.top + 4);
+        chart.ctx.restore();
+      }
+    };
+
     const redLinePlugin = {
       id: `redLine_${Math.random()}`, // id unique pour éviter les conflits de re-registration globale
       afterDatasetsDraw(chart: any) {
@@ -342,7 +366,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           },
         },
       },
-      plugins: [redLinePlugin], // plugin local à cette instance, pas global
+      plugins: [datePlugin, redLinePlugin], // plugins locaux à cette instance, pas globaux
     };
 
     try {
@@ -436,17 +460,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const dataPoints = this.calcul.generateGraphData(
       this.drinks,
       this.userProfile,
-      12,
-      timeFromFirstDrink
+      24
     );
 
     this.dataPoints = dataPoints;
 
-    // Si l'utilisateur n'a pas cliqué, laisser la barre rouge suivre le temps actuel
-    // Sinon garder la sélection de l'utilisateur
-    // IMPORTANT: selectedTimeMinutes stocke des HEURES (comme dataPoints[i].time)
+    // Barre rouge : afficher uniquement si "maintenant" est dans l'intervalle [début soirée, taux=0]
     if (!this.isUserSelecting) {
-      this.selectedTimeMinutes.set(timeFromFirstDrink / 60);
+      const nowInHours = timeFromFirstDrink / 60;
+      const graphEndTime = dataPoints.length > 0 ? dataPoints[dataPoints.length - 1].time : 0;
+      if (nowInHours >= 0 && nowInHours <= graphEndTime) {
+        this.selectedTimeMinutes.set(nowInHours);
+      } else {
+        this.selectedTimeMinutes.set(null); // Soirée passée : pas de barre rouge
+      }
     }
 
     // Utiliser les données du point sélectionné si présent, sinon utiliser le temps actuel
@@ -485,7 +512,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.etatDetaille.set(etatAlcool.status);
 
     // Labels en heure réelle (heure du premier verre + offset)
-    const firstDrinkMs = Date.now() - timeFromFirstDrink * 60 * 1000;
+    const firstDrinkMs = this.drinks.length > 0
+      ? this.drinks.reduce((earliest, d) =>
+          d.heure_consomation < earliest.heure_consomation ? d : earliest
+        ).heure_consomation.getTime()
+      : Date.now();
     const labels = dataPoints.map((p: AlcoholeDataPoint) => {
       const d = new Date(firstDrinkMs + p.time * 3600 * 1000);
       const h = d.getHours().toString().padStart(2, '0');
