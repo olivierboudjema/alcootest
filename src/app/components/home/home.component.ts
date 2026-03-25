@@ -13,7 +13,8 @@ import { Soiree } from '../../models/types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- Page principale : jamais de scroll -->
-    <div class="h-dvh bg-gradient-to-b from-blue-900 to-purple-900 flex flex-col justify-center p-6">
+    <div class="h-dvh bg-gradient-to-b from-blue-900 to-purple-900 flex flex-col justify-center p-6 overflow-hidden"
+         style="padding-top: max(1.5rem, env(safe-area-inset-top)); padding-bottom: max(1.5rem, env(safe-area-inset-bottom))">
       <div class="max-w-md mx-auto w-full space-y-4">
 
         <!-- Logo/Title -->
@@ -189,9 +190,11 @@ export class HomeComponent implements OnInit {
       this.showInstallButton.set(true);
     });
 
-    // iPhone : détecter Safari iOS hors PWA
-    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isStandalone = (window.navigator as any).standalone === true;
+    // iPhone : détecter iOS (bouton toujours visible si pas déjà installé)
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent.toLowerCase()) ||
+                  (/macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+    const isStandalone = (window.navigator as any).standalone === true ||
+                         window.matchMedia('(display-mode: standalone)').matches;
     if (isIos && !isStandalone) {
       this.showIosInstructions.set(true);
     }
