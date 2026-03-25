@@ -51,14 +51,16 @@ export class RoastService {
 
             const drinkSummary = drinks.length === 0
                 ? 'Aucun verre pour l\'instant.'
-                : drinks.map(d => `${d.nom} (${d.degre}°, ${d.quantite}mL)`).join(', ');
+                : drinks.map(d => `${d.nom} (type: ${d.type}, titre: ${d.degre}% vol, volume: ${d.quantite}mL)`).join(', ');
+            const drinkCount = `${drinks.length} verre${drinks.length > 1 ? 's' : ''} bu${drinks.length > 1 ? 's' : ''} au total`;
 
             const prompt = `Tu es un commentateur de soirée hilarant et piquant. Tu roastes venere les gens sur leur consommation d'alcool.
 
             Contexte :
             - Pseudo : ${username}
             - Soirée : "${soireeName}"
-            - Verres bus : ${drinkSummary}
+            - Nombre total : ${drinkCount}
+            - Détail des verres : ${drinkSummary}
 
             Expressions à utiliser comme inspiration (intègres-en une ou deux naturellement) :
             ${expressions}
