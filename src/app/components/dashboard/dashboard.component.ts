@@ -371,8 +371,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
           pointBackgroundColor: '#00ff00',
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
+          pointRadius: 0,
+          pointHoverRadius: 3,
         }],
       },
       options: {
