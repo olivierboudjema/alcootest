@@ -12,8 +12,8 @@ import { Soiree } from '../../models/types';
   imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <!-- Page principale : h-full, pas de scroll -->
-    <div class="h-full bg-gradient-to-b from-blue-900 to-purple-900 flex flex-col justify-center px-6 overflow-hidden"
+    <!-- Page principale : h-dvh, jamais de scroll -->
+    <div class="h-dvh bg-gradient-to-b from-blue-900 to-purple-900 flex flex-col justify-center px-6 overflow-hidden"
          style="padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: max(1rem, env(safe-area-inset-bottom))">
       <div class="max-w-md mx-auto w-full flex flex-col gap-3">
 

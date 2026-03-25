@@ -23,7 +23,8 @@ interface DrinkCategory {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 p-4 pb-32">
+    <div class="h-dvh bg-gradient-to-b from-slate-900 to-slate-800 overflow-y-auto p-4 pb-8"
+         style="padding-top: max(1rem, env(safe-area-inset-top))" #scrollContainer>
 
       <!-- Header -->
       <div class="max-w-md mx-auto mb-6 flex items-center gap-3 text-white">
@@ -307,8 +308,7 @@ export class AddDrinkComponent implements OnInit {
     );
     this.sliderValue.set(Math.max(0, Math.min(minutesFromStart, this.sliderMax())));
     this.editingDrink.set(drink);
-    // Scroll vers le haut
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelector('.h-dvh')?.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   async deleteDrink(drink: ConsommationAlcool) {
