@@ -12,49 +12,41 @@ import { Soiree } from '../../models/types';
   imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <!-- Page principale : jamais de scroll -->
-    <div class="h-dvh bg-gradient-to-b from-blue-900 to-purple-900 flex flex-col justify-center p-6 overflow-hidden"
-         style="padding-top: max(1.5rem, env(safe-area-inset-top)); padding-bottom: max(1.5rem, env(safe-area-inset-bottom))">
-      <div class="max-w-md mx-auto w-full space-y-4">
+    <!-- Page principale : h-full, pas de scroll -->
+    <div class="h-full bg-gradient-to-b from-blue-900 to-purple-900 flex flex-col justify-center px-6 overflow-hidden"
+         style="padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: max(1rem, env(safe-area-inset-bottom))">
+      <div class="max-w-md mx-auto w-full flex flex-col gap-3">
 
         <!-- Logo/Title -->
-        <div class="text-center mb-2">
-          <h1 class="text-4xl font-bold text-white mb-1">🍺 AlcooTest</h1>
-          <p class="text-blue-200 text-sm">Suivi d'alcoolémie en temps réel</p>
+        <div class="text-center">
+          <h1 class="text-3xl font-bold text-white">🍺 AlcooTest</h1>
+          <p class="text-blue-200 text-xs mt-1">Suivi d'alcoolémie en temps réel</p>
         </div>
 
         <!-- Bouton installer Android -->
         @if (showInstallButton()) {
-          <button
-            (click)="installApp()"
-            class="w-full bg-white/10 border border-white/30 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2"
-          >
+          <button (click)="installApp()"
+            class="w-full bg-white/10 border border-white/30 text-white py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2">
             📲 Installer sur l'écran d'accueil
           </button>
         }
 
         <!-- Bouton installer iPhone -->
         @if (showIosInstructions()) {
-          <button
-            (click)="showIosModal.set(true)"
-            class="w-full bg-white/10 border border-white/30 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2"
-          >
+          <button (click)="showIosModal.set(true)"
+            class="w-full bg-white/10 border border-white/30 text-white py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2">
             📲 Installer sur l'écran d'accueil
           </button>
         }
 
         <!-- Boutons principaux -->
-        <button
-          (click)="openOverlay('new')"
-          class="w-full bg-gradient-to-r from-green-400 to-blue-500 text-white py-4 rounded-lg font-bold text-lg"
-        >
+        <button (click)="openOverlay('new')"
+          class="w-full bg-gradient-to-r from-green-400 to-blue-500 text-white py-4 rounded-lg font-bold text-lg">
           ➕ Créer une soirée
         </button>
 
-        <button
-          (click)="openOverlay('load')"
-          class="w-full bg-gradient-to-r from-orange-400 to-red-500 text-white py-4 rounded-lg font-bold text-lg"
-        >
+        <button (click)="openOverlay('load')"
+          class="w-full bg-gradient-to-r from-orange-400 to-red-500 text-white py-4 rounded-lg font-bold text-lg">
           📋 Charger une soirée
         </button>
       </div>
