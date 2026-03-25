@@ -27,12 +27,8 @@ interface DrinkCategory {
          style="padding-top: max(1rem, env(safe-area-inset-top)); -webkit-overflow-scrolling: touch" #scrollContainer>
 
       <!-- Header -->
-      <div class="max-w-md mx-auto mb-6 flex items-center gap-3 text-white">
-        <button
-          (click)="cancel()"
-          class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition font-bold text-lg leading-none"
-        >←</button>
-        <h1 class="text-xl font-bold">Retour</h1>
+      <div class="max-w-md mx-auto mb-6 text-white">
+        <h1 class="text-xl font-bold">Verres de la soirée</h1>
       </div>
 
       <!-- 4 boutons catégorie -->
@@ -181,6 +177,16 @@ interface DrinkCategory {
             </div>
           }
         </div>
+      </div>
+
+      <!-- Bouton Valider -->
+      <div class="max-w-md mx-auto mt-6 mb-2">
+        <button
+          (click)="cancel()"
+          class="w-full bg-gradient-to-r from-green-400 to-blue-500 text-white py-4 rounded-xl font-bold text-lg"
+        >
+          ✓ Valider
+        </button>
       </div>
 
     </div>
