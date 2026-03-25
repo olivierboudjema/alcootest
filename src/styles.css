@@ -7,3 +7,7 @@ html, body {
   margin: 0;
   background-color: #1a1a2e;
 }
+
+input, select, textarea {
+  font-size: 16px !important;
+}

@@ -32,7 +32,7 @@ interface DrinkCategory {
           (click)="cancel()"
           class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition font-bold text-lg leading-none"
         >←</button>
-        <h1 class="text-xl font-bold">Verres de la soirée</h1>
+        <h1 class="text-xl font-bold">Retour</h1>
       </div>
 
       <!-- 4 boutons catégorie -->
@@ -153,7 +153,7 @@ interface DrinkCategory {
       <!-- ─── Liste des verres déjà consommés ─── -->
       <div class="max-w-md mx-auto mt-6">
         <h2 class="text-white font-semibold text-sm mb-3 px-1">
-          Verres déjà ajoutés ({{ consumedDrinks().length }})
+          Verres déjà bus ({{ consumedDrinks().length }})
         </h2>
 
         @if (consumedDrinks().length === 0) {
@@ -192,10 +192,10 @@ export class AddDrinkComponent implements OnInit {
   private router = inject(Router);
 
   readonly categories: DrinkCategory[] = [
-    { key: 'vin',      label: 'Vin',       emoji: '🍷', types: ['vin', 'champagne'] },
-    { key: 'biere',    label: 'Bière',     emoji: '🍺', types: ['biere'] },
+    { key: 'vin', label: 'Vin', emoji: '🍷', types: ['vin', 'champagne'] },
+    { key: 'biere', label: 'Bière', emoji: '🍺', types: ['biere'] },
     { key: 'cocktail', label: 'Cocktails', emoji: '🍹', types: ['cocktail', 'spiritueux pur'] },
-    { key: 'shot',     label: 'Shots',     emoji: '🔥', types: ['shot'] },
+    { key: 'shot', label: 'Shots', emoji: '🔥', types: ['shot'] },
   ];
 
   drinksByCategory: Record<string, Alcool[]> = {};
