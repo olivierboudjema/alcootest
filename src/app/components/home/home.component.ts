@@ -163,8 +163,8 @@ export class HomeComponent implements OnInit {
   formData = {
     username: '',
     soireeName: '',
-    age: 25,
-    poids: 70,
+    age: null as unknown as number,
+    poids: null as unknown as number,
     sexe: '' as 'H' | 'F' | '',
     mangedAvant: false,
     startTime: `${new Date().getHours().toString().padStart(2, '0')}:${new Date().getMinutes().toString().padStart(2, '0')}`,
