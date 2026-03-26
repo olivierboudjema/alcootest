@@ -98,6 +98,7 @@ import { takeUntil } from 'rxjs/operators';
         <div
           class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-4 rounded-lg border border-blue-500/20 text-white"
         >
+          <p class="text-xs text-blue-200 mb-2 tracking-wide">Ressenti à {{ timeDisplay() }} : {{ statusLabel() }}</p>
           <img
             [src]="imageUrl()"
             alt="État d'alcool"
@@ -151,6 +152,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   etatDetaille = signal('');
   imageUrl = signal('/assets/etat/0.0.jpg');
   selectedTimeMinutes = signal<number | null>(null);
+  timeDisplay = signal('');
+  statusLabel = signal('');
 
   drinks: ConsommationAlcool[] = [];
   private dataPoints: AlcoholeDataPoint[] = [];
@@ -484,8 +487,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.imageUrl.set(this.etat.getImageByTaux(selectedPoint.taux));
       const etatAlcool = this.etat.getEtatByTaux(selectedPoint.taux);
       if (!this.roastLoaded) this.etatDetaille.set(etatAlcool.status);
+      this.statusLabel.set(etatAlcool.status);
       this.emoji.set(this.calcul.getEmoji(selectedPoint.taux));
       this.statusDescription.set(this.calcul.getStatusDescription(selectedPoint.taux));
+
+      const firstDrinkMs = this.drinks.reduce((e: any, d: any) =>
+        d.heure_consomation < e.heure_consomation ? d : e
+      ).heure_consomation.getTime();
+      const clockDate = new Date(firstDrinkMs + selectedPoint.time * 3600 * 1000);
+      this.timeDisplay.set(`${clockDate.getHours().toString().padStart(2, '0')}:${clockDate.getMinutes().toString().padStart(2, '0')}`);
 
       // Redessiner le graphique pour afficher la ligne rouge
       if (this.chart) {
@@ -561,13 +571,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.imageUrl.set(this.etat.getImageByTaux(displayTaux));
     const etatAlcool = this.etat.getEtatByTaux(displayTaux);
     if (!this.roastLoaded) this.etatDetaille.set(etatAlcool.status);
+    this.statusLabel.set(etatAlcool.status);
 
     // Labels en heure réelle (heure du premier verre + offset)
     const firstDrinkMs = this.drinks.length > 0
       ? this.drinks.reduce((earliest, d) =>
-          d.heure_consomation < earliest.heure_consomation ? d : earliest
-        ).heure_consomation.getTime()
+        d.heure_consomation < earliest.heure_consomation ? d : earliest
+      ).heure_consomation.getTime()
       : Date.now();
+
+    if (this.selectedTimeMinutes() !== null) {
+      const d = new Date(firstDrinkMs + this.selectedTimeMinutes()! * 3600 * 1000);
+      this.timeDisplay.set(`${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`);
+    } else {
+      const now = new Date();
+      this.timeDisplay.set(`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`);
+    }
+
     const labels = dataPoints.map((p: AlcoholeDataPoint) => {
       const d = new Date(firstDrinkMs + p.time * 3600 * 1000);
       const h = d.getHours().toString().padStart(2, '0');
