@@ -58,7 +58,7 @@ interface DrinkCategory {
             >
               <div class="flex-1">
                 <div class="font-semibold">{{ drink.nom }}</div>
-                <div class="text-xs text-gray-400 mt-0.5">{{ drink.degre }}° · {{ drink.quantite }} cL</div>
+                <div class="text-xs text-gray-400 mt-0.5">{{ drink.degre }}° · {{ drink.quantite / 10 }} cL</div>
               </div>
               <span class="text-yellow-400 font-bold">→</span>
             </button>
@@ -79,13 +79,13 @@ interface DrinkCategory {
               <span class="text-3xl">{{ getEmojiForType(newDrink()!.type) }}</span>
               <div class="flex-1">
                 <div class="font-bold text-lg">{{ newDrink()!.nom }}</div>
-                <div class="text-sm text-gray-300">{{ newDrink()!.degre }}° · {{ newDrink()!.quantite }} cL</div>
+                <div class="text-sm text-gray-300">{{ newDrink()!.degre }}° · {{ newDrink()!.quantite / 10 }} cL</div>
               </div>
             } @else {
               <span class="text-3xl">{{ getEmojiForType(editingDrink()!.type) }}</span>
               <div class="flex-1">
                 <div class="font-bold text-lg">{{ editingDrink()!.nom }}</div>
-                <div class="text-sm text-gray-300">{{ editingDrink()!.degre }}° · {{ editingDrink()!.quantite }} cL</div>
+                <div class="text-sm text-gray-300">{{ editingDrink()!.degre }}° · {{ editingDrink()!.quantite / 10 }} cL</div>
               </div>
             }
             <button
