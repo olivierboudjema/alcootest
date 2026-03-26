@@ -14,7 +14,8 @@ export class CalculService {
     private readonly K_HOMME = 0.7;
     private readonly K_FEMME = 0.6;
     private readonly ELIMINATION_RATE = 0.15; // g/L par heure
-    private readonly DELAI_ABSORPTION_AVEC_REPAS = 30; // minutes
+    private readonly ABSORPTION_DURATION_SANS_REPAS = 30; // minutes jusqu'au pic
+    private readonly ABSORPTION_DURATION_AVEC_REPAS = 40; // minutes jusqu'au pic (repas = absorption plus lente)
 
     /**
      * Calcule l'alcool pur en grammes
@@ -53,9 +54,9 @@ export class CalculService {
         }));
 
         const k = this.getKCoefficient(userProfile.sexe);
-        const delaiAbsorption = userProfile.manage_avant
-            ? this.DELAI_ABSORPTION_AVEC_REPAS
-            : 0;
+        const absorptionDuration = userProfile.manage_avant
+            ? this.ABSORPTION_DURATION_AVEC_REPAS
+            : this.ABSORPTION_DURATION_SANS_REPAS;
 
         let totalTaux = 0;
 
@@ -69,9 +70,8 @@ export class CalculService {
                 drink.heure_consommation
             );
 
-            // Absorption commence immédiatement à la consommation, monte sur 20 min
-            const absorptionStartTime = timeFromFirstDrink + delaiAbsorption;
-            const absorptionDuration = 40; // minutes
+            // Absorption commence immédiatement, monte sur absorptionDuration minutes
+            const absorptionStartTime = timeFromFirstDrink; // pas de délai
 
             // Calcul du taux au moment du pic
             const pureAlcohol = this.calculatePureAlcohol(

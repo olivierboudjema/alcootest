@@ -80,12 +80,20 @@ import { takeUntil } from 'rxjs/operators';
           </div>
           
           <!-- Chart -->
-          <div class="h-[230px] w-full">
+          <div class="relative h-[230px] w-full">
             <canvas
               id="alcoholChart"
               #chartCanvas
               class="w-full h-full"
             ></canvas>
+            @if (showReturnToNow()) {
+              <button
+                (click)="returnToNow()"
+                class="absolute top-2 right-2 bg-blue-500/80 hover:bg-blue-400 text-white text-xs px-2 py-1 rounded-full backdrop-blur transition"
+              >
+                ⏱ Maintenant
+              </button>
+            }
           </div>
         </div>
       </div>
@@ -154,11 +162,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   selectedTimeMinutes = signal<number | null>(null);
   timeDisplay = signal('');
   statusLabel = signal('');
+  showReturnToNow = signal(false);
 
   drinks: ConsommationAlcool[] = [];
   private dataPoints: AlcoholeDataPoint[] = [];
   private currentTimeFromFirstDrink = 0;
-  private isUserSelecting = false; // Flag pour savoir si l'user a cliqué sur le graph
+  private isUserSelecting = false;
+  private lastUserSelectionTime: number | null = null;
 
   // Propriété ordinaire pour le profil utilisateur (à utiliser avec ngModel)
   userProfile: UserProfile = {
@@ -463,7 +473,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private handleCanvasClick(event: MouseEvent) {
     if (!this.chart) return;
 
-    this.isUserSelecting = true; // L'utilisateur a cliqué
+    this.isUserSelecting = true;
+    this.lastUserSelectionTime = Date.now();
 
     const canvasPosition = {
       x: event.offsetX,
@@ -497,6 +508,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const clockDate = new Date(firstDrinkMs + selectedPoint.time * 3600 * 1000);
       this.timeDisplay.set(`${clockDate.getHours().toString().padStart(2, '0')}:${clockDate.getMinutes().toString().padStart(2, '0')}`);
 
+      // Mettre à jour le bouton "Maintenant" immédiatement
+      const nowInHours = this.currentTimeFromFirstDrink / 60;
+      const graphStartTime = this.dataPoints.length > 0 ? this.dataPoints[0].time : -1;
+      const graphEndTime = this.dataPoints.length > 0 ? this.dataPoints[this.dataPoints.length - 1].time : 0;
+      this.showReturnToNow.set(nowInHours >= graphStartTime && nowInHours <= graphEndTime);
+
       // Redessiner le graphique pour afficher la ligne rouge
       if (this.chart) {
         this.chart.update('none');
@@ -524,18 +541,36 @@ export class DashboardComponent implements OnInit, OnDestroy {
       24
     );
 
-    this.dataPoints = dataPoints;
+    // Ajouter 1h de données vides avant le premier verre
+    const paddingPoints: AlcoholeDataPoint[] = [];
+    for (let i = 12; i >= 1; i--) {
+      paddingPoints.push({ time: -(i * 5) / 60, taux: 0 });
+    }
+    this.dataPoints = [...paddingPoints, ...dataPoints];
 
-    // Barre rouge : afficher uniquement si "maintenant" est dans l'intervalle [début soirée, taux=0]
-    if (!this.isUserSelecting) {
-      const nowInHours = timeFromFirstDrink / 60;
-      const graphEndTime = dataPoints.length > 0 ? dataPoints[dataPoints.length - 1].time : 0;
-      if (nowInHours >= 0 && nowInHours <= graphEndTime) {
-        this.selectedTimeMinutes.set(nowInHours);
-      } else {
-        this.selectedTimeMinutes.set(null); // Soirée passée : pas de barre rouge
+    // Auto-retour à maintenant après 5 minutes d'inactivité
+    if (this.isUserSelecting && this.lastUserSelectionTime !== null) {
+      if (Date.now() - this.lastUserSelectionTime >= 60 * 1000) {
+        this.isUserSelecting = false;
+        this.lastUserSelectionTime = null;
       }
     }
+
+    // Barre rouge : afficher uniquement si "maintenant" est dans l'intervalle [graph début, taux=0]
+    const nowInHours = timeFromFirstDrink / 60;
+    const graphStartTime = this.dataPoints.length > 0 ? this.dataPoints[0].time : -1;
+    const graphEndTime = dataPoints.length > 0 ? dataPoints[dataPoints.length - 1].time : 0;
+    const nowIsInGraph = nowInHours >= graphStartTime && nowInHours <= graphEndTime;
+
+    if (!this.isUserSelecting) {
+      if (nowIsInGraph) {
+        this.selectedTimeMinutes.set(nowInHours);
+      } else {
+        this.selectedTimeMinutes.set(null);
+      }
+    }
+
+    this.showReturnToNow.set(this.isUserSelecting && nowIsInGraph);
 
     // Utiliser les données du point sélectionné si présent, sinon utiliser le temps actuel
     let displayTaux = 0;
@@ -588,7 +623,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.timeDisplay.set(`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`);
     }
 
-    const labels = dataPoints.map((p: AlcoholeDataPoint) => {
+    const labels = this.dataPoints.map((p: AlcoholeDataPoint) => {
       const d = new Date(firstDrinkMs + p.time * 3600 * 1000);
       const h = d.getHours().toString().padStart(2, '0');
       const m = d.getMinutes().toString().padStart(2, '0');
@@ -597,7 +632,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     // Update chart data
     this.chart.data.labels = labels;
-    this.chart.data.datasets[0].data = dataPoints.map((p: AlcoholeDataPoint) => p.taux);
+    this.chart.data.datasets[0].data = this.dataPoints.map((p: AlcoholeDataPoint) => p.taux);
 
     // Debug: voir le contenu et le calcul
     console.debug('Dashboard graphique', {
@@ -623,6 +658,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     this.chart.update('none'); // Update without animation for performance
+  }
+
+  returnToNow() {
+    this.isUserSelecting = false;
+    this.lastUserSelectionTime = null;
+    this.updateChartData();
   }
 
   onProfileChange() {
