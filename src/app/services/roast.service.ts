@@ -62,7 +62,7 @@ export class RoastService {
             - Nombre total : ${drinkCount}
             - Détail des verres : ${drinkSummary}
 
-            Expressions à utiliser comme inspiration (intègres-en une ou deux naturellement) :
+            Expressions à utiliser comme inspiration (intègres-en une naturellement) :
             ${expressions}
 
             Génère UNE seule phrase courte (max 120 caractères), drôle et piquante en français, dans le style d'un ami qui roaste.
