@@ -20,8 +20,12 @@ export class EtatService {
         const etatData = {
             echelle_alcool_grammes: [
                 {
+                    level: "fin",
+                    status: "Soirée terminée."
+                },
+                {
                     level: "0.0",
-                    status: "Sobriété exemplaire."
+                    status: "Perso j'ai pas soif."
                 },
                 {
                     level: "0.1",
@@ -173,9 +177,17 @@ export class EtatService {
      * @param taux Taux d'alcoolémie en g/L
      * @returns Chemin de l'image
      */
+    getEtatFin(): EtatAlcool {
+        return this.etats.find(e => e.level === 'fin') ?? { level: 'fin', status: 'Soirée terminée.' };
+    }
+
     getImageByTaux(taux: number): string {
         const etat = this.getEtatByTaux(taux);
         return `/assets/etat/${etat.level}.jpg`;
+    }
+
+    getImageFin(): string {
+        return `/assets/etat/fin.jpg`;
     }
 
     /**

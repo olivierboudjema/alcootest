@@ -603,10 +603,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.calcul.getStatusDescription(displayTaux)
     );
     this.emoji.set(this.calcul.getEmoji(displayTaux));
-    this.imageUrl.set(this.etat.getImageByTaux(displayTaux));
-    const etatAlcool = this.etat.getEtatByTaux(displayTaux);
-    if (!this.roastLoaded) this.etatDetaille.set(etatAlcool.status);
-    this.statusLabel.set(etatAlcool.status);
+
+    // Afficher l'état "fin" si la soirée est terminée (on est après la fin du graphe)
+    const soireeTerminee = !this.isUserSelecting && !nowIsInGraph && nowInHours > graphEndTime;
+    if (soireeTerminee) {
+      this.imageUrl.set(this.etat.getImageFin());
+      const etatFin = this.etat.getEtatFin();
+      if (!this.roastLoaded) this.etatDetaille.set(etatFin.status);
+      this.statusLabel.set(etatFin.status);
+    } else {
+      this.imageUrl.set(this.etat.getImageByTaux(displayTaux));
+      const etatAlcool = this.etat.getEtatByTaux(displayTaux);
+      if (!this.roastLoaded) this.etatDetaille.set(etatAlcool.status);
+      this.statusLabel.set(etatAlcool.status);
+    }
 
     // Labels en heure réelle (heure du premier verre + offset)
     const firstDrinkMs = this.drinks.length > 0
