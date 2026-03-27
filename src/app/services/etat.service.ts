@@ -182,6 +182,9 @@ export class EtatService {
     }
 
     getImageByTaux(taux: number): string {
+        if (taux > 2.0) {
+            return `/assets/etat/2.0.jpg`;
+        }
         const etat = this.getEtatByTaux(taux);
         return `/assets/etat/${etat.level}.jpg`;
     }
