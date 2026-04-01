@@ -548,6 +548,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
     this.dataPoints = [...paddingPoints, ...dataPoints];
 
+    // Auto-scale Y selon le pic réel (seulement si l'utilisateur n'a pas zoomé manuellement)
+    if (!this.isUserSelecting && this.chart) {
+      const maxTaux = Math.max(...dataPoints.map(p => p.taux), 0);
+      const yMax = Math.max(Math.ceil(maxTaux * 10 + 1) / 10, 1);
+      (this.chart.options.scales!['y'] as any).max = yMax;
+    }
+
     // Auto-retour à maintenant après 5 minutes d'inactivité
     if (this.isUserSelecting && this.lastUserSelectionTime !== null) {
       if (Date.now() - this.lastUserSelectionTime >= 60 * 1000) {

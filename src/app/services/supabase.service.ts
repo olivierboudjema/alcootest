@@ -74,7 +74,7 @@ export class SupabaseService {
         const { data, error } = await this.supabase
             .from('soiree')
             .select()
-            .eq('creator', creator)
+            .ilike('creator', creator)
             .order('created_at', { ascending: false });
 
         if (error) throw error;

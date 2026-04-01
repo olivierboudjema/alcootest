@@ -225,6 +225,10 @@ export class HomeComponent implements OnInit {
       alert('Veuillez remplir tous les champs');
       return;
     }
+    if (!this.formData.poids || this.formData.poids < 30 || this.formData.poids > 300) {
+      alert('Veuillez entrer un poids valide (entre 30 et 300 kg)');
+      return;
+    }
 
     try {
       // Créer ou récupérer le profil

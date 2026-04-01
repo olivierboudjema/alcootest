@@ -53,55 +53,45 @@ export class CalculService {
             heure_consommation: drink.heure_consomation, // Utiliser la propriété existante
         }));
 
+        const poids = Number(userProfile.poids) || 70;
         const k = this.getKCoefficient(userProfile.sexe);
         const absorptionDuration = userProfile.manage_avant
             ? this.ABSORPTION_DURATION_AVEC_REPAS
             : this.ABSORPTION_DURATION_SANS_REPAS;
 
-        let totalTaux = 0;
-
         // Obtenir le temps du premier verre
         const firstDrinkTime = this.getFirstDrinkTime(drinksWithTime);
 
-
+        // Somme de l'alcool absorbé à l'instant T (sans élimination)
+        let totalAbsorbed = 0;
         drinksWithTime.forEach(drink => {
             const timeFromFirstDrink = this.getMinutesDifference(
                 firstDrinkTime,
                 drink.heure_consommation
             );
+            const absorptionStartTime = timeFromFirstDrink;
 
-            // Absorption commence immédiatement, monte sur absorptionDuration minutes
-            const absorptionStartTime = timeFromFirstDrink; // pas de délai
+            if (timeInMinutes < absorptionStartTime) return;
 
-            // Calcul du taux au moment du pic
-            const pureAlcohol = this.calculatePureAlcohol(
-                drink.quantite,
-                drink.degre
-            );
-            const peakTaux = pureAlcohol / (userProfile.poids * k);
+            const pureAlcohol = this.calculatePureAlcohol(drink.quantite, drink.degre);
+            const peakTaux = pureAlcohol / (poids * k);
 
-            if (timeInMinutes < absorptionStartTime) {
-                // Pas encore absorbé
-                return;
-            }
-
-            // Montée progressive pendant absorptionDuration minutes
             if (timeInMinutes <= absorptionStartTime + absorptionDuration) {
+                // Montée progressive
                 const fraction = (timeInMinutes - absorptionStartTime) / absorptionDuration;
-                totalTaux += peakTaux * fraction;
-                return;
+                totalAbsorbed += peakTaux * fraction;
+            } else {
+                // Verre entièrement absorbé
+                totalAbsorbed += peakTaux;
             }
-
-            // Après le pic : élimination
-            const elapsedAfterAbsorption = timeInMinutes - (absorptionStartTime + absorptionDuration);
-            const elimination =
-                (elapsedAfterAbsorption / 60) * this.ELIMINATION_RATE;
-            const drinkTaux = Math.max(0, peakTaux - elimination);
-
-            totalTaux += drinkTaux;
         });
 
-        return Math.max(0, totalTaux);
+        // Élimination globale depuis le premier verre (cinétique d'ordre zéro)
+        // Le foie traite l'alcool total en continu, pas verre par verre
+        const eliminatedHours = timeInMinutes / 60;
+        const totalEliminated = eliminatedHours * this.ELIMINATION_RATE;
+
+        return Math.max(0, totalAbsorbed - totalEliminated);
     }
 
     /**
