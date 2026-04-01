@@ -27,10 +27,16 @@ export class CalculService {
     }
 
     /**
-     * Calcule le coefficient de distribution K selon le sexe
+     * Calcule le coefficient de distribution K selon le sexe et l'âge.
+     * Avec l'âge, la proportion d'eau corporelle diminue, ce qui réduit K
+     * et augmente le taux d'alcoolémie pour une même quantité consommée.
+     * Réduction : -0.002 par an au-delà de 25 ans (plancher à 0.55 H / 0.45 F).
      */
-    private getKCoefficient(sexe: 'H' | 'F'): number {
-        return sexe === 'H' ? this.K_HOMME : this.K_FEMME;
+    private getKCoefficient(sexe: 'H' | 'F', age: number = 25): number {
+        const base = sexe === 'H' ? this.K_HOMME : this.K_FEMME;
+        const min  = sexe === 'H' ? 0.55 : 0.45;
+        const reduction = 0.002 * Math.max(0, age - 25);
+        return Math.max(min, base - reduction);
     }
 
     /**
@@ -54,7 +60,7 @@ export class CalculService {
         }));
 
         const poids = Number(userProfile.poids) || 70;
-        const k = this.getKCoefficient(userProfile.sexe);
+        const k = this.getKCoefficient(userProfile.sexe, userProfile.age);
         const absorptionDuration = userProfile.manage_avant
             ? this.ABSORPTION_DURATION_AVEC_REPAS
             : this.ABSORPTION_DURATION_SANS_REPAS;
