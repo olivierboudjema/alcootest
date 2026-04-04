@@ -5,6 +5,9 @@
 export interface Profile {
     id: string;
     username: string;
+    age?: number;
+    poids?: number;
+    sexe?: 'H' | 'F';
 }
 
 export interface Soiree {

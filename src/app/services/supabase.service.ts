@@ -31,6 +31,15 @@ export class SupabaseService {
         return data;
     }
 
+    async updateProfile(username: string, data: { age?: number; poids?: number; sexe?: 'H' | 'F' }): Promise<void> {
+        const { error } = await this.supabase
+            .from('profiles')
+            .update(data)
+            .eq('username', username);
+
+        if (error) throw error;
+    }
+
     async getProfile(username: string): Promise<Profile | null> {
         const { data, error } = await this.supabase
             .from('profiles')

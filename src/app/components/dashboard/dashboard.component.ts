@@ -685,6 +685,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   onProfileChange() {
     this.storage.setUserProfile(this.userProfile);
+    const username = this.storage.getUsername();
+    if (username) {
+      this.supabase.updateProfile(username, {
+        age: this.userProfile.age,
+        poids: this.userProfile.poids,
+        sexe: this.userProfile.sexe,
+      }).catch(e => console.warn('Impossible de sauver le profil:', e));
+    }
     this.updateChartData();
   }
 

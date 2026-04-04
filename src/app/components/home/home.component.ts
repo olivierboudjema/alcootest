@@ -175,6 +175,17 @@ export class HomeComponent implements OnInit {
     const currentSoireeId = this.storage.getCurrentSoiree();
     if (currentSoireeId) {
       this.router.navigate(['/dashboard']);
+      return;
+    }
+
+    // Pré-remplir le formulaire avec les données du dernier utilisateur
+    const username = this.storage.getUsername();
+    const profile = this.storage.getUserProfile();
+    if (username) this.formData.username = username;
+    if (profile) {
+      if (profile.age)   this.formData.age   = profile.age;
+      if (profile.poids) this.formData.poids = profile.poids;
+      if (profile.sexe)  this.formData.sexe  = profile.sexe;
     }
 
     if (!isPlatformBrowser(this.platformId)) return;
@@ -231,11 +242,16 @@ export class HomeComponent implements OnInit {
     }
 
     try {
-      // Créer ou récupérer le profil
+      // Créer ou récupérer le profil, puis sauvegarder age/poids/sexe
       let profile = await this.supabase.getProfile(this.formData.username);
       if (!profile) {
         profile = await this.supabase.createProfile(this.formData.username);
       }
+      await this.supabase.updateProfile(this.formData.username, {
+        age: this.formData.age,
+        poids: this.formData.poids,
+        sexe: this.formData.sexe as 'H' | 'F',
+      });
 
       // Créer la soirée avec l'heure de début choisie
       const [hours, minutes] = this.formData.startTime.split(':').map(Number);
@@ -291,9 +307,26 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  selectSoiree(soiree: Soiree) {
+  async selectSoiree(soiree: Soiree) {
     this.storage.setUsername(soiree.creator);
     this.storage.setCurrentSoiree(soiree.id);
+
+    // Charger le profil depuis Supabase pour restaurer age/poids/sexe
+    try {
+      const profile = await this.supabase.getProfile(soiree.creator);
+      if (profile?.age || profile?.poids || profile?.sexe) {
+        const existing = this.storage.getUserProfile() || {};
+        this.storage.setUserProfile({
+          ...existing,
+          age:   profile.age   ?? existing.age   ?? 25,
+          poids: profile.poids ?? existing.poids ?? 70,
+          sexe:  profile.sexe  ?? existing.sexe  ?? 'H',
+        });
+      }
+    } catch (e) {
+      console.warn('Impossible de charger le profil depuis Supabase:', e);
+    }
+
     this.router.navigate(['/dashboard']);
   }
 }
