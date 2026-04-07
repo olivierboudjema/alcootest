@@ -23,170 +23,164 @@ interface DrinkCategory {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="h-dvh bg-gradient-to-b from-slate-900 to-slate-800 overflow-y-auto p-4 pb-8"
-         style="padding-top: max(1rem, env(safe-area-inset-top)); -webkit-overflow-scrolling: touch" #scrollContainer>
+    <div class="h-dvh bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden"
+         style="padding-top: max(0.75rem, env(safe-area-inset-top)); padding-bottom: max(0.75rem, env(safe-area-inset-bottom))">
 
-      <!-- Header -->
-      <div class="max-w-md mx-auto mb-6 text-white">
-        <h1 class="text-xl font-bold">Verres de la soirée</h1>
-      </div>
-
-      <!-- 4 boutons catégorie -->
-      <div class="max-w-md mx-auto mb-4 grid grid-cols-2 gap-3">
-        @for (cat of categories; track cat.key) {
-          <button
-            (click)="toggleCategory(cat.key)"
-            class="p-5 rounded-xl border text-white flex flex-col items-center gap-2 transition-all"
-            [ngClass]="openCategory() === cat.key
-              ? 'bg-yellow-400/20 border-yellow-400 ring-2 ring-yellow-400'
-              : 'bg-gradient-to-br from-blue-600/30 to-purple-600/30 border-blue-500/20 hover:from-blue-600/50 hover:to-purple-600/50'"
-          >
-            <span class="text-5xl">{{ cat.emoji }}</span>
-            <span class="font-bold text-lg">{{ cat.label }}</span>
-            <span class="text-xs text-gray-400">{{ (drinksByCategory[cat.key] || []).length }} référence(s)</span>
+      <!-- Header fixe -->
+      <div class="flex-shrink-0 px-4 pb-3">
+        <div class="max-w-md mx-auto flex items-center gap-3">
+          <button (click)="cancel()"
+            class="text-white p-1.5 hover:bg-white/10 rounded-lg transition flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
           </button>
-        }
+          <h1 class="text-xl font-bold text-white">Verres de la soirée</h1>
+        </div>
       </div>
 
-      <!-- Accordéon: catalogue de la catégorie ouverte -->
-      @if (openCategory() !== null && newDrink() === null && editingDrink() === null) {
-        <div class="max-w-md mx-auto mb-4 rounded-xl border border-blue-500/20 overflow-hidden">
-          @for (drink of drinksByCategory[openCategory()!] || []; track drink.id) {
+      <!-- Contenu scrollable -->
+      <div class="flex-1 min-h-0 overflow-y-auto px-4" style="-webkit-overflow-scrolling: touch" id="addDrinkScroll">
+
+        <!-- 4 boutons catégorie -->
+        <div class="max-w-md mx-auto mb-4 grid grid-cols-2 gap-3">
+          @for (cat of categories; track cat.key) {
             <button
-              (click)="startAddDrink(drink)"
-              class="w-full p-4 text-left text-white bg-slate-800 hover:bg-slate-700 transition border-b border-slate-700 last:border-b-0 flex items-center justify-between gap-3"
+              (click)="toggleCategory(cat.key)"
+              class="p-4 rounded-xl border text-white flex flex-col items-center gap-1.5 transition-all"
+              [ngClass]="openCategory() === cat.key
+                ? 'bg-yellow-400/20 border-yellow-400 ring-2 ring-yellow-400'
+                : 'bg-gradient-to-br from-blue-600/30 to-purple-600/30 border-blue-500/20 hover:from-blue-600/50 hover:to-purple-600/50'"
             >
-              <div class="flex-1">
-                <div class="font-semibold">{{ drink.nom }}</div>
-                <div class="text-xs text-gray-400 mt-0.5">{{ drink.degre }}° · {{ drink.quantite / 10 }} cL</div>
-              </div>
-              <span class="text-yellow-400 font-bold">→</span>
+              <span class="text-4xl">{{ cat.emoji }}</span>
+              <span class="font-bold text-base">{{ cat.label }}</span>
+              <span class="text-xs text-gray-400">{{ (drinksByCategory[cat.key] || []).length }} référence(s)</span>
             </button>
           }
-          @if ((drinksByCategory[openCategory()!] || []).length === 0) {
-            <div class="p-6 text-center text-gray-500 bg-slate-800">Aucun verre dans cette catégorie</div>
-          }
         </div>
-      }
 
-      <!-- Panneau time picker (ajout ou modification) -->
-      @if (newDrink() !== null || editingDrink() !== null) {
-        <div class="max-w-md mx-auto mb-4 space-y-3">
-
-          <!-- Info du verre concerné -->
-          <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 p-4 rounded-xl border border-blue-500/20 text-white flex items-center gap-3">
-            @if (newDrink() !== null) {
-              <span class="text-3xl">{{ getEmojiForType(newDrink()!.type) }}</span>
-              <div class="flex-1">
-                <div class="font-bold text-lg">{{ newDrink()!.nom }}</div>
-                <div class="text-sm text-gray-300">{{ newDrink()!.degre }}° · {{ newDrink()!.quantite / 10 }} cL</div>
-              </div>
-            } @else {
-              <span class="text-3xl">{{ getEmojiForType(editingDrink()!.type) }}</span>
-              <div class="flex-1">
-                <div class="font-bold text-lg">{{ editingDrink()!.nom }}</div>
-                <div class="text-sm text-gray-300">{{ editingDrink()!.degre }}° · {{ editingDrink()!.quantite / 10 }} cL</div>
-              </div>
-            }
-            <button
-              (click)="clearPicker()"
-              class="text-gray-400 hover:text-white p-1 hover:bg-white/10 rounded-lg transition text-lg"
-            >✕</button>
-          </div>
-
-          <!-- Frise chronologique -->
-          <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 p-4 rounded-xl border border-blue-500/20 text-white">
-            <div class="text-sm font-semibold text-gray-300 mb-4">À quelle heure ?</div>
-
-            <div class="text-center mb-6">
-              <span class="text-5xl font-bold text-yellow-400 tabular-nums">{{ selectedTimeDisplay() }}</span>
-            </div>
-
-            <div class="px-1">
-              <input
-                type="range"
-                [min]="sliderMin()"
-                [max]="sliderMax()"
-                [value]="sliderValue()"
-                (input)="onSliderChange($event)"
-                step="5"
-                class="w-full cursor-pointer"
-                style="accent-color: #facc15;"
-              />
-              <div class="relative mt-3 h-10">
-                @for (tick of timelineTicks(); track tick.label) {
-                  <div
-                    class="absolute flex flex-col items-center"
-                    [style.left.%]="tick.pct"
-                    style="transform: translateX(-50%)"
-                  >
-                    <div class="w-px h-2 mb-1" [ngClass]="tick.isNow ? 'bg-yellow-400' : 'bg-gray-600'"></div>
-                    <span class="text-xs whitespace-nowrap" [ngClass]="tick.isNow ? 'text-yellow-400 font-bold' : 'text-gray-500'">{{ tick.label }}</span>
+        <!-- Accordéon: catalogue de la catégorie ouverte (scrollable) -->
+        @if (openCategory() !== null && newDrink() === null && editingDrink() === null) {
+          <div class="max-w-md mx-auto mb-4 rounded-xl border border-blue-500/20 overflow-hidden">
+            <div class="overflow-y-auto max-h-52">
+              @for (drink of drinksByCategory[openCategory()!] || []; track drink.id) {
+                <button
+                  (click)="startAddDrink(drink)"
+                  class="w-full p-4 text-left text-white bg-slate-800 hover:bg-slate-700 transition border-b border-slate-700 last:border-b-0 flex items-center justify-between gap-3"
+                >
+                  <div class="flex-1">
+                    <div class="font-semibold">{{ drink.nom }}</div>
+                    <div class="text-xs text-gray-400 mt-0.5">{{ drink.degre }}° · {{ drink.quantite / 10 }} cL</div>
                   </div>
-                }
-              </div>
+                  <span class="text-yellow-400 font-bold">→</span>
+                </button>
+              }
+              @if ((drinksByCategory[openCategory()!] || []).length === 0) {
+                <div class="p-6 text-center text-gray-500 bg-slate-800">Aucun verre dans cette catégorie</div>
+              }
             </div>
-          </div>
-
-          <!-- Bouton confirmer -->
-          <button
-            (click)="confirmPicker()"
-            [disabled]="isLoading()"
-            class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg transition disabled:opacity-60"
-          >
-            @if (isLoading()) {
-              En cours...
-            } @else if (editingDrink() !== null) {
-              ✓ Modifier l'heure
-            } @else {
-              ✓ Ajouter ce verre
-            }
-          </button>
-
-        </div>
-      }
-
-      <!-- ─── Liste des verres déjà consommés ─── -->
-      <div class="max-w-md mx-auto mt-6">
-        <h2 class="text-white font-semibold text-sm mb-3 px-1">
-          Verres déjà bus ({{ consumedDrinks().length }})
-        </h2>
-
-        @if (consumedDrinks().length === 0) {
-          <div class="text-center text-gray-500 text-sm py-6 bg-slate-800/50 rounded-xl border border-slate-700">
-            Aucun verre pour l'instant
           </div>
         }
 
-        <div class="space-y-2">
-          @for (drink of consumedDrinks(); track drink.soiree_alcool_id) {
-            <div class="bg-slate-800 rounded-xl border border-slate-700 p-3 flex items-center gap-3 text-white">
-              <span class="text-2xl">{{ getEmojiForType(drink.type) }}</span>
-              <div class="flex-1 min-w-0">
-                <div class="font-semibold text-sm truncate">{{ drink.nom }}</div>
-                <div class="text-xs text-gray-400">{{ formatTime(drink.heure_consomation) }}</div>
+        <!-- Panneau time picker (ajout ou modification) -->
+        @if (newDrink() !== null || editingDrink() !== null) {
+          <div class="max-w-md mx-auto mb-4 space-y-3">
+
+            <!-- Info du verre concerné -->
+            <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 p-4 rounded-xl border border-blue-500/20 text-white flex items-center gap-3">
+              @if (newDrink() !== null) {
+                <span class="text-3xl">{{ getEmojiForType(newDrink()!.type) }}</span>
+                <div class="flex-1">
+                  <div class="font-bold text-lg">{{ newDrink()!.nom }}</div>
+                  <div class="text-sm text-gray-300">{{ newDrink()!.degre }}° · {{ newDrink()!.quantite / 10 }} cL</div>
+                </div>
+              } @else {
+                <span class="text-3xl">{{ getEmojiForType(editingDrink()!.type) }}</span>
+                <div class="flex-1">
+                  <div class="font-bold text-lg">{{ editingDrink()!.nom }}</div>
+                  <div class="text-sm text-gray-300">{{ editingDrink()!.degre }}° · {{ editingDrink()!.quantite / 10 }} cL</div>
+                </div>
+              }
+              <button (click)="clearPicker()"
+                class="text-gray-400 hover:text-white p-1 hover:bg-white/10 rounded-lg transition text-lg">✕</button>
+            </div>
+
+            <!-- Frise chronologique -->
+            <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 p-4 rounded-xl border border-blue-500/20 text-white">
+              <div class="text-sm font-semibold text-gray-300 mb-4">À quelle heure ?</div>
+              <div class="text-center mb-6">
+                <span class="text-5xl font-bold text-yellow-400 tabular-nums">{{ selectedTimeDisplay() }}</span>
               </div>
-              <button
-                (click)="startEditDrink(drink)"
-                class="px-3 py-1.5 rounded-lg bg-blue-600/40 hover:bg-blue-600/70 text-blue-300 text-xs font-semibold transition"
-              >Changer</button>
-              <button
-                (click)="deleteDrink(drink)"
-                class="px-3 py-1.5 rounded-lg bg-red-600/30 hover:bg-red-600/60 text-red-400 text-xs font-semibold transition"
-              >🗑</button>
+              <div class="px-1">
+                <input type="range" [min]="sliderMin()" [max]="sliderMax()" [value]="sliderValue()"
+                  (input)="onSliderChange($event)" step="5" class="w-full cursor-pointer"
+                  style="accent-color: #facc15;" />
+                <div class="relative mt-3 h-10">
+                  @for (tick of timelineTicks(); track tick.label) {
+                    <div class="absolute flex flex-col items-center" [style.left.%]="tick.pct"
+                      style="transform: translateX(-50%)">
+                      <div class="w-px h-2 mb-1" [ngClass]="tick.isNow ? 'bg-yellow-400' : 'bg-gray-600'"></div>
+                      <span class="text-xs whitespace-nowrap" [ngClass]="tick.isNow ? 'text-yellow-400 font-bold' : 'text-gray-500'">{{ tick.label }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Bouton confirmer -->
+            <button (click)="confirmPicker()" [disabled]="isLoading()"
+              class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg transition disabled:opacity-60">
+              @if (isLoading()) {
+                En cours...
+              } @else if (editingDrink() !== null) {
+                ✓ Modifier l'heure
+              } @else {
+                ✓ Ajouter ce verre
+              }
+            </button>
+
+          </div>
+        }
+
+        <!-- ─── Liste des verres déjà consommés ─── -->
+        <div class="max-w-md mx-auto mt-4 mb-2">
+          <h2 class="text-white font-semibold text-sm mb-3 px-1">
+            Verres déjà bus ({{ consumedDrinks().length }})
+          </h2>
+
+          @if (consumedDrinks().length === 0) {
+            <div class="text-center text-gray-500 text-sm py-6 bg-slate-800/50 rounded-xl border border-slate-700">
+              Aucun verre pour l'instant
             </div>
           }
+
+          <div class="space-y-2">
+            @for (drink of consumedDrinks(); track drink.soiree_alcool_id) {
+              <div class="bg-slate-800 rounded-xl border border-slate-700 p-3 flex items-center gap-3 text-white">
+                <span class="text-2xl">{{ getEmojiForType(drink.type) }}</span>
+                <div class="flex-1 min-w-0">
+                  <div class="font-semibold text-sm truncate">{{ drink.nom }}</div>
+                  <div class="text-xs text-gray-400">{{ formatTime(drink.heure_consomation) }}</div>
+                </div>
+                <button (click)="startEditDrink(drink)"
+                  class="px-3 py-1.5 rounded-lg bg-blue-600/40 hover:bg-blue-600/70 text-blue-300 text-xs font-semibold transition">Changer</button>
+                <button (click)="deleteDrink(drink)"
+                  class="px-3 py-1.5 rounded-lg bg-red-600/30 hover:bg-red-600/60 text-red-400 text-xs font-semibold transition">🗑</button>
+              </div>
+            }
+          </div>
         </div>
+
       </div>
 
-      <!-- Bouton Valider -->
-      <div class="max-w-md mx-auto mt-6 mb-2">
-        <button
-          (click)="cancel()"
-          class="w-full bg-gradient-to-r from-green-400 to-blue-500 text-white py-4 rounded-xl font-bold text-lg"
-        >
-          ✓ Valider
-        </button>
+      <!-- Footer fixe : bouton Valider -->
+      <div class="flex-shrink-0 px-4 pt-2">
+        <div class="max-w-md mx-auto">
+          <button (click)="cancel()"
+            class="w-full bg-gradient-to-r from-green-400 to-blue-500 text-white py-4 rounded-xl font-bold text-lg">
+            ✓ Valider
+          </button>
+        </div>
       </div>
 
     </div>
@@ -315,7 +309,7 @@ export class AddDrinkComponent implements OnInit {
     );
     this.sliderValue.set(Math.max(0, Math.min(minutesFromStart, this.sliderMax())));
     this.editingDrink.set(drink);
-    document.querySelector('.h-dvh')?.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('addDrinkScroll')?.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   async deleteDrink(drink: ConsommationAlcool) {

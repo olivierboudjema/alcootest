@@ -25,112 +25,90 @@ import { takeUntil } from 'rxjs/operators';
   imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="h-dvh overflow-y-auto bg-gradient-to-b from-slate-900 to-slate-800 p-4"
-         style="padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: max(2rem, env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch">
-      <!-- Compact Header with Profile -->
-      <div class="max-w-md mx-auto mb-3 text-white">
-        <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-2 rounded-lg border border-blue-500/20">
-          <!-- Single Line Profile Editor -->
-          <div class="flex items-center gap-2 text-xs justify-between">
-            <div class="flex items-center">
-              <h1 class="text-lg font-bold">{{ currentSoireeName() }}</h1>
-              
-            </div>
-                 <div class="flex items-center gap-1">
-<b><p class="text-xs text-gray-300 ml-2">{{ activeUsername() }}</p></b>
-                 </div>
-            <div class="flex items-center gap-1">
-              <input
-                [(ngModel)]="userProfile.poids"
-                (change)="onProfileChange()"
-                type="number"
-                class="w-10 px-1 py-0.5 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
-              />
-              <span class="text-gray-400">kg</span>
-            </div>
-            <div class="flex items-center gap-1">
-              <select
-                [(ngModel)]="userProfile.sexe"
-                (change)="onProfileChange()"
-                class="px-1 py-0.5 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
-              >
-                <option value="H">H</option>
-                <option value="F">F</option>
-              </select>
-            </div>
-            <div class="flex items-center gap-1">
-              <input
-                [(ngModel)]="userProfile.age"
-                (change)="onProfileChange()"
-                type="number"
-                class="w-10 px-1 py-0.5 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
-              />
-              <span class="text-gray-400">ans</span>
+    <div class="h-dvh bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden"
+         style="padding-top: max(0.75rem, env(safe-area-inset-top)); padding-bottom: max(0.75rem, env(safe-area-inset-bottom))">
+
+      <!-- Header : profil -->
+      <div class="flex-shrink-0 px-4 pb-2">
+        <div class="max-w-md mx-auto">
+          <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-2 rounded-lg border border-blue-500/20">
+            <div class="flex items-center gap-2 text-xs justify-between">
+              <div class="flex items-center">
+                <h1 class="text font-bold text-white">{{ currentSoireeName() }}</h1>
+              </div>
+              <div class="flex items-center gap-1">
+                <b><p class="text-xs text-gray-300 ml-2">{{ activeUsername() }}</p></b>
+              </div>
+                          <div class="flex items-center gap-1">
+                <select [(ngModel)]="userProfile.sexe" (change)="onProfileChange()"
+                  class="px-1 py-0.5 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs">
+                  <option value="H">H</option>
+                  <option value="F">F</option>
+                </select>
+              </div>
+       
+  
+              <div class="flex items-center gap-1">
+                <input [(ngModel)]="userProfile.age" (change)="onProfileChange()" type="number"
+                  class="w-10 px-1 py-0.5 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs" />
+                <span class="text-gray-400">ans</span>
+              </div>
+                     <div class="flex items-center gap-1">
+                <input [(ngModel)]="userProfile.poids" (change)="onProfileChange()" type="number"
+                  class="w-10 px-1 py-0.5 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs" />
+                <span class="text-gray-400">kg</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Alcohol Score + Chart in Same Box -->
-      <div class="max-w-md mx-auto mb-3">
-        <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-3 rounded-lg border border-blue-500/20">
-          <!-- Score at top -->
-          <div class="text-center mb-3">
-            <div class="text-3xl font-bold text-green-400">{{ currentTaux() }}g/L</div>
-          </div>
-          
-          <!-- Chart -->
-          <div class="relative h-[230px] w-full">
-            <canvas
-              id="alcoholChart"
-              #chartCanvas
-              class="w-full h-full"
-            ></canvas>
-            @if (showReturnToNow()) {
-              <button
-                (click)="returnToNow()"
-                class="absolute top-2 right-2 bg-blue-500/80 hover:bg-blue-400 text-white text-xs px-2 py-1 rounded-full backdrop-blur transition"
-              >
-                ⏱ Maintenant
-              </button>
-            }
+      <!-- Contenu central -->
+      <div class="flex-1 min-h-0 px-4 flex flex-col gap-2 overflow-hidden">
+
+        <!-- Score + Graphique -->
+        <div class="flex-shrink-0 max-w-md mx-auto w-full">
+          <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-3 rounded-lg border border-blue-500/20">
+            <div class="text-center mb-2">
+              <div class="text-3xl font-bold text-green-400">{{ currentTaux() }}g/L</div>
+            </div>
+            <div class="relative h-[270px] w-full">
+              <canvas id="alcoholChart" #chartCanvas class="w-full h-full"></canvas>
+              @if (showReturnToNow()) {
+                <button (click)="returnToNow()"
+                  class="absolute top-2 right-2 bg-blue-500/80 hover:bg-blue-400 text-white text-xs px-2 py-1 rounded-full backdrop-blur transition">
+                  ⏱ Maintenant
+                </button>
+              }
+            </div>
           </div>
         </div>
-      </div>
 
-
-
-
-      <!-- Etat d'alcool détaillé avec Image -->
-      <div class="max-w-md mx-auto mb-4 text-center">
-        <div
-          class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-4 rounded-lg border border-blue-500/20 text-white"
-        >
-          <p class="text-xs text-blue-200 mb-2 tracking-wide">Ressenti à {{ timeDisplay() }} : {{ statusLabel() }}</p>
-          <img
-            [src]="imageUrl()"
-            alt="État d'alcool"
-            class="w-full h-[172px] object-contain rounded-lg mb-3"
-          />
-          <p class="text-sm italic text-yellow-300">{{ etatDetaille() }}</p>
+        <!-- État d'alcool -->
+        <div class="flex-shrink-0 max-w-md mx-auto w-full">
+          <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-3 rounded-lg border border-blue-500/20 text-white flex flex-col">
+            <p class="text-xs text-blue-200 mb-1 tracking-wide">Ressenti à {{ timeDisplay() }} : {{ statusLabel() }}</p>
+            <img [src]="imageUrl()" alt="État d'alcool"
+              class="w-full h-[272px] object-contain rounded-lg mb-2" />
+            <p class="text-sm italic text-yellow-300 line-clamp-2">{{ etatDetaille() }}</p>
+          </div>
         </div>
+
       </div>
 
-      <!-- Buttons Container -->
-      <div class="">
-        <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-3 rounded-lg border border-blue-500/20 space-y-2">
-          <button
-            (click)="goToAddDrink()"
-            class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-3 rounded-lg font-bold text-base hover:shadow-lg transition transform hover:scale-105"
-          >
-            ➕ Ajouter un verre
-          </button>
-          <button
-            (click)="endSoiree()"
-            class="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-bold transition"
-          >
-            💾 Sauver et quitter la soirée
-          </button>
+      <!-- Footer : boutons côte à côte -->
+      <div class="flex-shrink-0 px-4 pt-2">
+        <div class="max-w-md mx-auto">
+          <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-2 rounded-lg border border-blue-500/20 flex gap-2">
+            <button (click)="goToAddDrink()"
+              class="flex-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-3 rounded-lg font-bold text-sm hover:shadow-lg transition">
+              ➕ Ajouter un verre
+            </button>
+            <button (click)="endSoiree()"
+              class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-bold text-sm transition">
+              💾 Sauver la soirée
+            </button>
+          </div>
         </div>
       </div>
 
