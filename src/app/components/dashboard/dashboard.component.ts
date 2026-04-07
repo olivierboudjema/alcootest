@@ -25,11 +25,10 @@ import { takeUntil } from 'rxjs/operators';
   imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden"
-         style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom)">
+    <div class="fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden">
 
       <!-- Header : flex 1 (~10%) -->
-      <div class="px-4 py-1 flex items-center" style="flex: 1; min-height: 0">
+      <div class="px-4 py-1 flex items-center" style="flex: 1; min-height: 0; padding-top: env(safe-area-inset-top)">
         <div class="max-w-md mx-auto w-full">
           <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur px-2 py-1.5 rounded-lg border border-blue-500/20">
             <div class="flex items-center gap-2 text-xs justify-between">
@@ -86,7 +85,7 @@ import { takeUntil } from 'rxjs/operators';
       </div>
 
       <!-- Footer : flex 1 (~10%) -->
-      <div class="px-4 flex items-center" style="flex: 1; min-height: 0">
+      <div class="px-4 flex items-center" style="flex: 1; min-height: 0; padding-bottom: env(safe-area-inset-bottom)">
         <div class="max-w-md mx-auto w-full">
           <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-2 rounded-lg border border-blue-500/20 flex gap-2">
             <button (click)="goToAddDrink()"
