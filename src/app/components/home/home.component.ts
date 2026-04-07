@@ -13,7 +13,7 @@ import { Soiree } from '../../models/types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- Page principale : h-dvh, jamais de scroll -->
-    <div class="h-dvh bg-gradient-to-b from-blue-900 to-purple-900 flex flex-col justify-center px-6 overflow-hidden"
+    <div class="h-full bg-gradient-to-b from-blue-900 to-purple-900 flex flex-col justify-center px-6 overflow-hidden"
          style="padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: max(1rem, env(safe-area-inset-bottom))">
       <div class="max-w-md mx-auto w-full flex flex-col gap-3">
 

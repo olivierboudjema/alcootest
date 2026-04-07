@@ -23,7 +23,7 @@ interface DrinkCategory {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="h-dvh bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden"
+    <div class="h-full bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden"
          style="padding-top: max(0.75rem, env(safe-area-inset-top)); padding-bottom: max(0.75rem, env(safe-area-inset-bottom))">
 
       <!-- Header fixe -->
