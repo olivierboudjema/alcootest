@@ -6,6 +6,7 @@ html, body {
   height: 100%;
   margin: 0;
   background-color: #1a1a2e;
+  overscroll-behavior: none;
 }
 
 input, select, textarea {

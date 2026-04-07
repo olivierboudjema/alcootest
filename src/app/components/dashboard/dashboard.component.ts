@@ -81,7 +81,7 @@ import { takeUntil } from 'rxjs/operators';
           <p class="text-xs text-blue-200 mb-1 tracking-wide flex-shrink-0">Ressenti à {{ timeDisplay() }} : {{ statusLabel() }}</p>
           <img [src]="imageUrl()" alt="État d'alcool"
             class="flex-1 min-h-0 w-full object-contain rounded-lg" />
-          <p class="text-sm italic text-yellow-300 flex-shrink-0 mt-1 line-clamp-2">{{ etatDetaille() }}</p>
+          <p class="text-sm italic text-yellow-300 flex-shrink-0 mt-1">{{ etatDetaille() }}</p>
         </div>
       </div>
 
