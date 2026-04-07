@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -160,6 +160,7 @@ export class HomeComponent implements OnInit {
   private storage = inject(StorageService);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private cdr = inject(ChangeDetectorRef);
 
   formData = {
     username: '',
@@ -304,6 +305,8 @@ export class HomeComponent implements OnInit {
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
       alert('Erreur lors du chargement des soirées');
+    } finally {
+      this.cdr.markForCheck();
     }
   }
 

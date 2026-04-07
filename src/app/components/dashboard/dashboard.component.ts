@@ -25,37 +25,31 @@ import { takeUntil } from 'rxjs/operators';
   imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="h-dvh bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden"
-         style="padding-top: max(0.75rem, env(safe-area-inset-top)); padding-bottom: max(0.75rem, env(safe-area-inset-bottom))">
+    <div class="h-dvh bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden">
 
-      <!-- Header : profil -->
-      <div class="flex-shrink-0 px-4 pb-2">
-        <div class="max-w-md mx-auto">
-          <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-2 rounded-lg border border-blue-500/20">
+      <!-- Header 10% -->
+      <div class="h-[10%] px-4 flex items-center flex-shrink-0"
+           style="padding-top: env(safe-area-inset-top)">
+        <div class="max-w-md mx-auto w-full">
+          <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur px-2 py-1.5 rounded-lg border border-blue-500/20">
             <div class="flex items-center gap-2 text-xs justify-between">
-              <div class="flex items-center">
-                <h1 class="text font-bold text-white">{{ currentSoireeName() }}</h1>
-              </div>
+              <h1 class="font-bold text-white text-sm">{{ currentSoireeName() }}</h1>
+              <b><span class="text-gray-300">{{ activeUsername() }}</span></b>
               <div class="flex items-center gap-1">
-                <b><p class="text-xs text-gray-300 ml-2">{{ activeUsername() }}</p></b>
-              </div>
-                          <div class="flex items-center gap-1">
                 <select [(ngModel)]="userProfile.sexe" (change)="onProfileChange()"
-                  class="px-1 py-0.5 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs">
+                  class="px-1 py-0.5 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none text-xs">
                   <option value="H">H</option>
                   <option value="F">F</option>
                 </select>
               </div>
-       
-  
               <div class="flex items-center gap-1">
                 <input [(ngModel)]="userProfile.age" (change)="onProfileChange()" type="number"
-                  class="w-10 px-1 py-0.5 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs" />
+                  class="w-10 px-1 py-0.5 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none text-xs" />
                 <span class="text-gray-400">ans</span>
               </div>
-                     <div class="flex items-center gap-1">
+              <div class="flex items-center gap-1">
                 <input [(ngModel)]="userProfile.poids" (change)="onProfileChange()" type="number"
-                  class="w-10 px-1 py-0.5 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs" />
+                  class="w-10 px-1 py-0.5 bg-slate-700 text-white rounded border border-slate-600 focus:outline-none text-xs" />
                 <span class="text-gray-400">kg</span>
               </div>
             </div>
@@ -63,49 +57,45 @@ import { takeUntil } from 'rxjs/operators';
         </div>
       </div>
 
-      <!-- Contenu central -->
-      <div class="flex-1 min-h-0 px-4 flex flex-col gap-2 overflow-hidden">
-
-        <!-- Score + Graphique -->
-        <div class="flex-shrink-0 max-w-md mx-auto w-full">
-          <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-3 rounded-lg border border-blue-500/20">
-            <div class="text-center mb-2">
-              <div class="text-3xl font-bold text-green-400">{{ currentTaux() }}g/L</div>
-            </div>
-            <div class="relative h-[270px] w-full">
-              <canvas id="alcoholChart" #chartCanvas class="w-full h-full"></canvas>
-              @if (showReturnToNow()) {
-                <button (click)="returnToNow()"
-                  class="absolute top-2 right-2 bg-blue-500/80 hover:bg-blue-400 text-white text-xs px-2 py-1 rounded-full backdrop-blur transition">
-                  ⏱ Maintenant
-                </button>
-              }
-            </div>
+      <!-- Graphique 40% -->
+      <div class="h-[40%] px-4 pb-2 flex-shrink-0">
+        <div class="max-w-md mx-auto h-full bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-3 rounded-lg border border-blue-500/20 flex flex-col">
+          <div class="text-center flex-shrink-0 mb-1">
+            <div class="text-2xl font-bold text-green-400">{{ currentTaux() }}g/L</div>
+          </div>
+          <div class="flex-1 min-h-0 relative">
+            <canvas id="alcoholChart" #chartCanvas class="w-full h-full"></canvas>
+            @if (showReturnToNow()) {
+              <button (click)="returnToNow()"
+                class="absolute top-1 right-1 bg-blue-500/80 hover:bg-blue-400 text-white text-xs px-2 py-1 rounded-full backdrop-blur transition">
+                ⏱ Maintenant
+              </button>
+            }
           </div>
         </div>
-
-        <!-- État d'alcool -->
-        <div class="flex-shrink-0 max-w-md mx-auto w-full">
-          <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-3 rounded-lg border border-blue-500/20 text-white flex flex-col">
-            <p class="text-xs text-blue-200 mb-1 tracking-wide">Ressenti à {{ timeDisplay() }} : {{ statusLabel() }}</p>
-            <img [src]="imageUrl()" alt="État d'alcool"
-              class="w-full h-[272px] object-contain rounded-lg mb-2" />
-            <p class="text-sm italic text-yellow-300 line-clamp-2">{{ etatDetaille() }}</p>
-          </div>
-        </div>
-
       </div>
 
-      <!-- Footer : boutons côte à côte -->
-      <div class="flex-shrink-0 px-4 pt-2">
-        <div class="max-w-md mx-auto">
+      <!-- Image + état 40% -->
+      <div class="h-[40%] px-4 pb-2 flex-shrink-0">
+        <div class="max-w-md mx-auto h-full bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-3 rounded-lg border border-blue-500/20 text-white flex flex-col">
+          <p class="text-xs text-blue-200 mb-1 tracking-wide flex-shrink-0">Ressenti à {{ timeDisplay() }} : {{ statusLabel() }}</p>
+          <img [src]="imageUrl()" alt="État d'alcool"
+            class="flex-1 min-h-0 w-full object-contain rounded-lg" />
+          <p class="text-sm italic text-yellow-300 flex-shrink-0 mt-1 line-clamp-2">{{ etatDetaille() }}</p>
+        </div>
+      </div>
+
+      <!-- Footer 10% -->
+      <div class="h-[10%] px-4 flex items-center flex-shrink-0"
+           style="padding-bottom: env(safe-area-inset-bottom)">
+        <div class="max-w-md mx-auto w-full">
           <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-2 rounded-lg border border-blue-500/20 flex gap-2">
             <button (click)="goToAddDrink()"
-              class="flex-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-3 rounded-lg font-bold text-sm hover:shadow-lg transition">
+              class="flex-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-2 rounded-lg font-bold text-sm hover:shadow-lg transition">
               ➕ Ajouter un verre
             </button>
             <button (click)="endSoiree()"
-              class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-bold text-sm transition">
+              class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-bold text-sm transition">
               💾 Sauver la soirée
             </button>
           </div>
