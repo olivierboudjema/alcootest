@@ -25,7 +25,7 @@ import { takeUntil } from 'rxjs/operators';
   imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="h-dvh bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden"
+    <div class="fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden"
          style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom)">
 
       <!-- Header : flex 1 (~10%) -->
