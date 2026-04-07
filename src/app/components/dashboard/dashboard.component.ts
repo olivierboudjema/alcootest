@@ -25,11 +25,11 @@ import { takeUntil } from 'rxjs/operators';
   imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="h-dvh bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden">
+    <div class="h-dvh bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden"
+         style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom)">
 
-      <!-- Header 10% -->
-      <div class="h-[10%] px-4 flex items-center flex-shrink-0"
-           style="padding-top: env(safe-area-inset-top)">
+      <!-- Header : flex 1 (~10%) -->
+      <div class="px-4 py-1 flex items-center" style="flex: 1; min-height: 0">
         <div class="max-w-md mx-auto w-full">
           <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur px-2 py-1.5 rounded-lg border border-blue-500/20">
             <div class="flex items-center gap-2 text-xs justify-between">
@@ -57,8 +57,8 @@ import { takeUntil } from 'rxjs/operators';
         </div>
       </div>
 
-      <!-- Graphique 40% -->
-      <div class="h-[40%] px-4 pb-2 flex-shrink-0">
+      <!-- Graphique : flex 4 (~40%) -->
+      <div class="px-4 pb-2" style="flex: 4; min-height: 0">
         <div class="max-w-md mx-auto h-full bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-3 rounded-lg border border-blue-500/20 flex flex-col">
           <div class="text-center flex-shrink-0 mb-1">
             <div class="text-2xl font-bold text-green-400">{{ currentTaux() }}g/L</div>
@@ -75,8 +75,8 @@ import { takeUntil } from 'rxjs/operators';
         </div>
       </div>
 
-      <!-- Image + état 40% -->
-      <div class="h-[40%] px-4 pb-2 flex-shrink-0">
+      <!-- Image + état : flex 4 (~40%) -->
+      <div class="px-4 pb-2" style="flex: 4; min-height: 0">
         <div class="max-w-md mx-auto h-full bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-3 rounded-lg border border-blue-500/20 text-white flex flex-col">
           <p class="text-xs text-blue-200 mb-1 tracking-wide flex-shrink-0">Ressenti à {{ timeDisplay() }} : {{ statusLabel() }}</p>
           <img [src]="imageUrl()" alt="État d'alcool"
@@ -85,9 +85,8 @@ import { takeUntil } from 'rxjs/operators';
         </div>
       </div>
 
-      <!-- Footer 10% -->
-      <div class="h-[10%] px-4 flex items-center flex-shrink-0"
-           style="padding-bottom: env(safe-area-inset-bottom)">
+      <!-- Footer : flex 1 (~10%) -->
+      <div class="px-4 flex items-center" style="flex: 1; min-height: 0">
         <div class="max-w-md mx-auto w-full">
           <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-2 rounded-lg border border-blue-500/20 flex gap-2">
             <button (click)="goToAddDrink()"
