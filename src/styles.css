@@ -9,7 +9,7 @@
 html,
 body {
   height: 100%;
-  min-height: 250dvh;
+  min-height: 150dvh;
   margin: 0;
   overflow: hidden;
   background-color: #1a1a2e;
