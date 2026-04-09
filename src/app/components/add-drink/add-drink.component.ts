@@ -24,7 +24,7 @@ interface DrinkCategory {
   imports: [CommonModule],
   template: `
     <div class="bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden"
-         style="height: var(--app-height, 100%); padding-top: max(0.75rem, env(safe-area-inset-top)); padding-bottom: max(0.75rem, env(safe-area-inset-bottom))">
+         style="height: var(--app-height, 100%); padding-top: max(0.75rem, env(safe-area-inset-top)); ">
 
       <!-- Header fixe -->
       <div class="flex-shrink-0 px-4 pb-3">

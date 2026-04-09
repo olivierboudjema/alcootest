@@ -14,7 +14,7 @@ import { Soiree } from '../../models/types';
   template: `
     <!-- Page principale : h-dvh, jamais de scroll -->
     <div class="bg-gradient-to-b from-blue-900 to-purple-900 flex flex-col justify-center px-6 overflow-hidden"
-         style="height: var(--app-height, 100%); padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: max(1rem, env(safe-area-inset-bottom))">
+         style="height: var(--app-height, 100%); padding-top: max(1rem, env(safe-area-inset-top)); ">
       <div class="max-w-md mx-auto w-full flex flex-col gap-3">
 
         <!-- Logo/Title -->
@@ -184,9 +184,9 @@ export class HomeComponent implements OnInit {
     const profile = this.storage.getUserProfile();
     if (username) this.formData.username = username;
     if (profile) {
-      if (profile.age)   this.formData.age   = profile.age;
+      if (profile.age) this.formData.age = profile.age;
       if (profile.poids) this.formData.poids = profile.poids;
-      if (profile.sexe)  this.formData.sexe  = profile.sexe;
+      if (profile.sexe) this.formData.sexe = profile.sexe;
     }
 
     if (!isPlatformBrowser(this.platformId)) return;
@@ -200,9 +200,9 @@ export class HomeComponent implements OnInit {
 
     // iPhone : détecter iOS (bouton toujours visible si pas déjà installé)
     const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent.toLowerCase()) ||
-                  (/macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+      (/macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
     const isStandalone = (window.navigator as any).standalone === true ||
-                         window.matchMedia('(display-mode: standalone)').matches;
+      window.matchMedia('(display-mode: standalone)').matches;
     if (isIos && !isStandalone) {
       this.showIosInstructions.set(true);
     }
@@ -321,9 +321,9 @@ export class HomeComponent implements OnInit {
         const existing = this.storage.getUserProfile() || {};
         this.storage.setUserProfile({
           ...existing,
-          age:   profile.age   ?? existing.age   ?? 25,
+          age: profile.age ?? existing.age ?? 25,
           poids: profile.poids ?? existing.poids ?? 70,
-          sexe:  profile.sexe  ?? existing.sexe  ?? 'H',
+          sexe: profile.sexe ?? existing.sexe ?? 'H',
         });
       }
     } catch (e) {
