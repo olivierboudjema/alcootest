@@ -174,7 +174,7 @@ interface DrinkCategory {
       </div>
 
       <!-- Footer fixe : bouton Valider -->
-      <div class="flex-shrink-0 px-4 pt-2">
+      <div class="flex-shrink-0 px-4 pt-2 mb-5">
         <div class="max-w-md mx-auto">
           <button (click)="cancel()"
             class="w-full bg-gradient-to-r from-green-400 to-blue-500 text-white py-4 rounded-xl font-bold text-lg">
