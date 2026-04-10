@@ -151,6 +151,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Register Chart.js components
     Chart.register(CategoryScale, LinearScale, PointElement, LineElement, LineController, Title, Tooltip, Legend, Filler);
 
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
     this.initializeDashboard();
     // Mettre à jour toutes les 5 secondes
     interval(5000)
