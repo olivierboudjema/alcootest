@@ -188,7 +188,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       // Initialiser le graphique
       setTimeout(() => {
         this.initChart();
-        this.updateChartData(); // Mettre à jour le graphique avec les données chargées
+        this.updateChartData();
+        // Sur iOS PWA, le layout peut ne pas être stabilisé au premier chargement
+        // On force un resize après que le viewport soit finalisé
+        setTimeout(() => {
+          this.chart?.resize();
+          this.updateChartData();
+        }, 300);
       }, 100);
     } catch (error) {
       console.error('Erreur initialisation:', error);
