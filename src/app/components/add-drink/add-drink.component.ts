@@ -24,7 +24,7 @@ interface DrinkCategory {
   imports: [CommonModule],
   template: `
     <div class="bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden"
-         style="height: var(--app-height, 100%); padding-top: max(0.75rem, env(safe-area-inset-top)); ">
+         style="height: 100dvh; padding-top: max(0.75rem, env(safe-area-inset-top)); padding-bottom: env(safe-area-inset-bottom)">
 
       <!-- Header fixe -->
       <div class="flex-shrink-0 px-4 pb-3">
@@ -245,6 +245,9 @@ export class AddDrinkComponent implements OnInit {
   });
 
   async ngOnInit() {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
     const soireeIdStr = this.storage.getCurrentSoiree();
     if (!soireeIdStr) { this.router.navigate(['/']); return; }
 
