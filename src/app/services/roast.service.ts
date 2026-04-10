@@ -47,7 +47,7 @@ export class RoastService {
 
         try {
             const allExpressions = await this.loadExpressions();
-            const expressions = this.pickRandom(allExpressions, 17).join('\n');
+            const expression = this.pickRandom(allExpressions, 1)[0];
 
             const drinkSummary = drinks.length === 0
                 ? 'Aucun verre pour l\'instant.'
@@ -62,12 +62,12 @@ export class RoastService {
             - Nombre total : ${drinkCount}
             - Détail des verres : ${drinkSummary}
 
-            Expressions à utiliser comme inspiration (intègres-en une naturellement) :
-            ${expressions}
+            Expression à intégrer dans la phrase :
+            ${expression}
 
             Génère UNE seule phrase courte (max 120 caractères), drôle et piquante en français, dans le style d'un ami qui roaste.
             - Mentionne un verre spécifique si possible
-            - Utilise une expression de la liste de façon naturelle
+            - Intègre l'expression donnée de façon naturelle
             - Pas de hashtag, pas d'emoji
             - Réponds UNIQUEMENT avec la phrase, rien d'autre`;
 
