@@ -14,7 +14,7 @@ import { Soiree } from '../../models/types';
   template: `
     <!-- Page principale : h-dvh, jamais de scroll -->
     <div class="bg-gradient-to-b from-blue-900 to-purple-900 flex flex-col justify-center px-6 overflow-hidden"
-         style="height: var(--app-height, 100%); padding-top: max(1rem, env(safe-area-inset-top)); ">
+         style="height: 100dvh; padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: env(safe-area-inset-bottom)">
       <div class="max-w-md mx-auto w-full flex flex-col gap-3">
 
         <!-- Logo/Title -->

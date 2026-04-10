@@ -16,16 +16,6 @@ export class App {
   constructor() {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    // Fix iOS PWA standalone : height: 100% ne couvre pas le bas de l'écran
-    const isIosStandalone = (window.navigator as any).standalone === true;
-    if (isIosStandalone) {
-      const setHeight = () => {
-        document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
-      };
-      setHeight();
-      window.addEventListener('resize', setHeight);
-    }
-
     const swUpdate = inject(SwUpdate);
     if (!swUpdate.isEnabled) return;
 

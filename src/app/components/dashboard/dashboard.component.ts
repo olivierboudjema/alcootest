@@ -26,7 +26,7 @@ import { takeUntil } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden"
-         style="height: var(--app-height, 100%)">
+         style="height: 100dvh">
 
       <!-- Header : flex 1 (~10%) -->
       <div class="px-4 py-1 flex items-center" style="flex: 1; min-height: 0; padding-top: env(safe-area-inset-top)">
@@ -86,7 +86,7 @@ import { takeUntil } from 'rxjs/operators';
       </div>
 
       <!-- Footer : flex 1 (~10%) -->
-      <div class="px-4 flex items-center" style="flex: 1; min-height: 0; ">
+      <div class="px-4 flex items-center" style="flex: 1; min-height: 0; padding-bottom: env(safe-area-inset-bottom)">
         <div class="max-w-md mx-auto w-full">
           <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur p-2 rounded-lg border border-blue-500/20 flex gap-2">
             <button (click)="goToAddDrink()"
