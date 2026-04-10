@@ -115,15 +115,6 @@ interface DrinkCategory {
                 <input type="range" [min]="sliderMin()" [max]="sliderMax()" [value]="sliderValue()"
                   (input)="onSliderChange($event)" step="5" class="w-full cursor-pointer"
                   style="accent-color: #facc15;" />
-                <div class="relative mt-3 h-10">
-                  @for (tick of timelineTicks(); track tick.label) {
-                    <div class="absolute flex flex-col items-center" [style.left.%]="tick.pct"
-                      style="transform: translateX(-50%)">
-                      <div class="w-px h-2 mb-1" [ngClass]="tick.isNow ? 'bg-yellow-400' : 'bg-gray-600'"></div>
-                      <span class="text-xs whitespace-nowrap" [ngClass]="tick.isNow ? 'text-yellow-400 font-bold' : 'text-gray-500'">{{ tick.label }}</span>
-                    </div>
-                  }
-                </div>
               </div>
             </div>
 
