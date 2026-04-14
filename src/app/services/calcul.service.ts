@@ -113,22 +113,32 @@ export class CalculService {
         userProfile: UserProfile,
         maxDurationHours: number = 24,
     ): AlcoholeDataPoint[] {
+        if (drinks.length === 0) return [];
+
         const dataPoints: AlcoholeDataPoint[] = [];
-        const totalMinutes = maxDurationHours * 60;
+
+        // Durée en minutes du dernier verre par rapport au premier
+        const firstDrinkMs = Math.min(...drinks.map(d => d.heure_consomation.getTime()));
+        const lastDrinkMs  = Math.max(...drinks.map(d => d.heure_consomation.getTime()));
+        const lastDrinkMinutes = (lastDrinkMs - firstDrinkMs) / 60000;
+
+        // On va au moins 24h après le dernier verre pour laisser le temps à l'élimination
+        const totalMinutes = Math.max(maxDurationHours * 60, lastDrinkMinutes + 24 * 60);
+
         let hasSeenNonZero = false;
 
-        // Un point tous les 5 minutes, de t=0 jusqu'au moment où le taux revient à 0
         for (let i = 0; i <= totalMinutes; i += 5) {
             const taux = this.calculateAlcoholLevel(drinks, userProfile, i);
             dataPoints.push({
-                time: i / 60, // heures depuis le premier verre
+                time: i / 60,
                 taux: Math.round(taux * 1000) / 1000,
             });
 
             if (taux > 0.01) hasSeenNonZero = true;
 
-            // Arrêter dès que le taux est retombé à zéro
-            if (hasSeenNonZero && taux <= 0.01) {
+            // Arrêter uniquement quand le taux est à zéro ET qu'on est bien
+            // passé au-delà du dernier verre + sa fenêtre d'absorption (~45 min)
+            if (hasSeenNonZero && taux <= 0.01 && i > lastDrinkMinutes + 45) {
                 break;
             }
         }

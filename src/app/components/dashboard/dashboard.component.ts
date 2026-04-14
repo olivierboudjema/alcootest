@@ -5,8 +5,9 @@ import {
   ChangeDetectionStrategy,
   signal,
   inject,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Chart, ChartConfiguration, CategoryScale, LinearScale, PointElement, LineElement, LineController, Title, Tooltip, Legend, Filler } from 'chart.js';
@@ -115,6 +116,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private roast = inject(RoastService);
   private router = inject(Router);
 
+  private platformId = inject(PLATFORM_ID);
   private roastLoaded = false;
 
   // Signaux
@@ -148,6 +150,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   soireeId = signal<number | null>(null);
 
   ngOnInit() {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     // Register Chart.js components
     Chart.register(CategoryScale, LinearScale, PointElement, LineElement, LineController, Title, Tooltip, Legend, Filler);
 

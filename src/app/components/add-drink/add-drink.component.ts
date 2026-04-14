@@ -4,8 +4,9 @@ import {
   signal,
   computed,
   inject,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../../services/supabase.service';
 import { StorageService } from '../../services/storage.service';
@@ -105,16 +106,32 @@ interface DrinkCategory {
                 class="text-gray-400 hover:text-white p-1 hover:bg-white/10 rounded-lg transition text-lg">✕</button>
             </div>
 
-            <!-- Frise chronologique -->
+            <!-- Sélecteur de jour + heure -->
             <div class="bg-gradient-to-r from-blue-600/30 to-purple-600/30 p-4 rounded-xl border border-blue-500/20 text-white">
-              <div class="text-sm font-semibold text-gray-300 mb-4">À quelle heure ?</div>
-              <div class="text-center mb-6">
+
+              <!-- Jour -->
+              <div class="text-sm font-semibold text-gray-300 mb-2">Quel jour ?</div>
+              <div class="flex items-center justify-between mb-4 gap-2">
+                <button (click)="prevDay()"
+                  class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition text-xl font-bold">‹</button>
+                <span class="text-base font-semibold text-white flex-1 text-center">{{ selectedDayLabel() }}</span>
+                <button (click)="nextDay()" [disabled]="!canGoNextDay()"
+                  class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition text-xl font-bold disabled:opacity-30">›</button>
+              </div>
+
+              <!-- Heure -->
+              <div class="text-sm font-semibold text-gray-300 mb-2">À quelle heure ?</div>
+              <div class="text-center mb-4">
                 <span class="text-5xl font-bold text-yellow-400 tabular-nums">{{ selectedTimeDisplay() }}</span>
               </div>
               <div class="px-1">
-                <input type="range" [min]="sliderMin()" [max]="sliderMax()" [value]="sliderValue()"
+                <input type="range" min="0" max="1439" [value]="sliderValue()"
                   (input)="onSliderChange($event)" step="5" class="w-full cursor-pointer"
                   style="accent-color: #facc15;" />
+                <div class="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>0h00</span>
+                  <span>23h59</span>
+                </div>
               </div>
             </div>
 
@@ -183,6 +200,7 @@ export class AddDrinkComponent implements OnInit {
   private supabase = inject(SupabaseService);
   private storage = inject(StorageService);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
 
   readonly categories: DrinkCategory[] = [
     { key: 'vin', label: 'Vin', emoji: '🍷', types: ['vin', 'champagne'] },
@@ -195,49 +213,36 @@ export class AddDrinkComponent implements OnInit {
   consumedDrinks = signal<ConsommationAlcool[]>([]);
 
   openCategory = signal<string | null>(null);
-  newDrink = signal<Alcool | null>(null);          // verre en cours d'ajout
-  editingDrink = signal<ConsommationAlcool | null>(null); // verre en cours de modif
+  newDrink = signal<Alcool | null>(null);
+  editingDrink = signal<ConsommationAlcool | null>(null);
   isLoading = signal(false);
 
-  // Timeline
-  private soireeStartMs = signal(0);
-  private nowMs = signal(Date.now());
-  sliderMin = signal(0);
-  sliderMax = signal(0);
+  // Jour sélectionné (minuit local) et minutes depuis minuit (0–1439)
+  selectedDay = signal<Date>(this.todayMidnight());
   sliderValue = signal(0);
 
   selectedTimeDisplay = computed(() => {
-    const ts = this.soireeStartMs() + this.sliderValue() * 60 * 1000;
-    return this.formatMs(ts);
+    const h = Math.floor(this.sliderValue() / 60).toString().padStart(2, '0');
+    const m = (this.sliderValue() % 60).toString().padStart(2, '0');
+    return `${h}h${m}`;
   });
 
-  timelineTicks = computed(() => {
-    const start = this.soireeStartMs();
-    const max = this.sliderMax();
-    const now = this.nowMs();
-    if (max === 0) return [];
+  selectedDayLabel = computed(() => {
+    const day = this.selectedDay();
+    const today = this.todayMidnight();
+    const diffDays = Math.round((today.getTime() - day.getTime()) / 86400000);
+    if (diffDays === 0) return "Aujourd'hui";
+    if (diffDays === 1) return 'Hier';
+    return day.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  });
 
-    const ticks: { pct: number; label: string; isNow: boolean }[] = [];
-    const nowMinutes = Math.floor((now - start) / 60000);
-    const tickSet = new Set<number>();
-
-    for (let min = 0; min <= max; min += 180) tickSet.add(min);
-    tickSet.add(max);
-
-    const hasNowTick = [...tickSet].some(m => Math.abs(m - nowMinutes) < 30);
-    if (!hasNowTick) tickSet.add(nowMinutes);
-
-    for (const min of [...tickSet].sort((a, b) => a - b)) {
-      ticks.push({
-        pct: (min / max) * 100,
-        label: min === nowMinutes ? 'maintenant' : this.formatMs(start + min * 60000),
-        isNow: min === nowMinutes,
-      });
-    }
-    return ticks;
+  canGoNextDay = computed(() => {
+    return this.selectedDay().getTime() < this.todayMidnight().getTime();
   });
 
   async ngOnInit() {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
@@ -245,24 +250,10 @@ export class AddDrinkComponent implements OnInit {
     if (!soireeIdStr) { this.router.navigate(['/']); return; }
 
     try {
-      const [soiree, alcools, consumed] = await Promise.all([
-        this.supabase.getSoiree(soireeIdStr),
+      const [alcools, consumed] = await Promise.all([
         this.supabase.getAllDrinks(),
         this.supabase.getDrinksBySoiree(Number(soireeIdStr)),
       ]);
-
-      const parseUTC = (s: string) => new Date(/Z|[+-]\d{2}:?\d{2}$/.test(s) ? s : s + 'Z');
-      const startMs = soiree.created_at
-        ? parseUTC(soiree.created_at).getTime()
-        : Date.now() - 8 * 60 * 60 * 1000;
-      const nowMs = Date.now();
-      const maxMs = nowMs + 12 * 60 * 60 * 1000;
-
-      this.soireeStartMs.set(startMs);
-      this.nowMs.set(nowMs);
-      this.sliderMin.set(0);
-      this.sliderMax.set(Math.ceil((maxMs - startMs) / 60000));
-      this.sliderValue.set(Math.floor((nowMs - startMs) / 60000));
 
       for (const cat of this.categories) {
         this.drinksByCategory[cat.key] = alcools.filter(a =>
@@ -270,7 +261,6 @@ export class AddDrinkComponent implements OnInit {
         );
       }
 
-      // Trier par heure croissante
       this.consumedDrinks.set(
         [...consumed].sort((a, b) => a.heure_consomation.getTime() - b.heure_consomation.getTime())
       );
@@ -290,7 +280,8 @@ export class AddDrinkComponent implements OnInit {
   startAddDrink(drink: Alcool) {
     this.editingDrink.set(null);
     this.newDrink.set(drink);
-    this.sliderValue.set(Math.floor((Date.now() - this.soireeStartMs()) / 60000));
+    this.selectedDay.set(this.todayMidnight());
+    this.sliderValue.set(this.nowMinutes());
     this.openCategory.set(null);
   }
 
@@ -299,11 +290,9 @@ export class AddDrinkComponent implements OnInit {
   startEditDrink(drink: ConsommationAlcool) {
     this.newDrink.set(null);
     this.openCategory.set(null);
-    // Positionner le slider sur l'heure actuelle du verre
-    const minutesFromStart = Math.floor(
-      (drink.heure_consomation.getTime() - this.soireeStartMs()) / 60000
-    );
-    this.sliderValue.set(Math.max(0, Math.min(minutesFromStart, this.sliderMax())));
+    const d = drink.heure_consomation;
+    this.selectedDay.set(new Date(d.getFullYear(), d.getMonth(), d.getDate()));
+    this.sliderValue.set(d.getHours() * 60 + d.getMinutes());
     this.editingDrink.set(drink);
     document.getElementById('addDrinkScroll')?.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -318,7 +307,18 @@ export class AddDrinkComponent implements OnInit {
     }
   }
 
-  // ─── Time picker ──────────────────────────────────────────────
+  // ─── Day/Time picker ─────────────────────────────────────────
+
+  prevDay() {
+    const d = this.selectedDay();
+    this.selectedDay.set(new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1));
+  }
+
+  nextDay() {
+    if (!this.canGoNextDay()) return;
+    const d = this.selectedDay();
+    this.selectedDay.set(new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1));
+  }
 
   clearPicker() {
     this.newDrink.set(null);
@@ -331,13 +331,14 @@ export class AddDrinkComponent implements OnInit {
 
   async confirmPicker() {
     if (this.isLoading()) return;
-    const heure = new Date(this.soireeStartMs() + this.sliderValue() * 60000);
+    const day = this.selectedDay();
+    const heure = new Date(day.getFullYear(), day.getMonth(), day.getDate(),
+      Math.floor(this.sliderValue() / 60), this.sliderValue() % 60);
     const soireeIdStr = this.storage.getCurrentSoiree();
 
     this.isLoading.set(true);
     try {
       if (this.editingDrink() !== null) {
-        // Modification de l'heure
         const editing = this.editingDrink()!;
         await this.supabase.updateDrinkTime(editing.soiree_alcool_id, heure);
         this.consumedDrinks.update(list =>
@@ -350,9 +351,7 @@ export class AddDrinkComponent implements OnInit {
         );
         this.clearPicker();
       } else if (this.newDrink() !== null && soireeIdStr) {
-        // Ajout d'un nouveau verre
         await this.supabase.addDrink(this.newDrink()!.id, Number(soireeIdStr), heure);
-        // Recharger la liste
         const updated = await this.supabase.getDrinksBySoiree(Number(soireeIdStr));
         this.consumedDrinks.set(
           [...updated].sort((a, b) => a.heure_consomation.getTime() - b.heure_consomation.getTime())
@@ -374,12 +373,13 @@ export class AddDrinkComponent implements OnInit {
   }
 
   formatTime(date: Date): string {
-    return `${date.getHours().toString().padStart(2, '0')}h${date.getMinutes().toString().padStart(2, '0')}`;
-  }
-
-  private formatMs(ms: number): string {
-    const d = new Date(ms);
-    return `${d.getHours().toString().padStart(2, '0')}h${d.getMinutes().toString().padStart(2, '0')}`;
+    const today = this.todayMidnight();
+    const drinkDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const diffDays = Math.round((today.getTime() - drinkDay.getTime()) / 86400000);
+    const time = `${date.getHours().toString().padStart(2, '0')}h${date.getMinutes().toString().padStart(2, '0')}`;
+    if (diffDays === 0) return time;
+    if (diffDays === 1) return `Hier ${time}`;
+    return `${date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} ${time}`;
   }
 
   getEmojiForType(type: string): string {
@@ -388,5 +388,15 @@ export class AddDrinkComponent implements OnInit {
       'spiritueux pur': '🥃', biere: '🍺', shot: '🔥',
     };
     return map[type] ?? '🍶';
+  }
+
+  private todayMidnight(): Date {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  private nowMinutes(): number {
+    const d = new Date();
+    return d.getHours() * 60 + d.getMinutes();
   }
 }
