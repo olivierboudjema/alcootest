@@ -106,11 +106,13 @@ interface DrinkCategory {
               <div>
                 <label class="text-xs text-gray-400 block mb-1">Degré d'alcool (%)</label>
                 <input [(ngModel)]="customDegre" type="number" min="0" max="100" step="0.5"
+                  (blur)="onInputBlur()"
                   class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400" />
               </div>
               <div>
                 <label class="text-xs text-gray-400 block mb-1">Quantité (cL)</label>
                 <input [(ngModel)]="customQuantiteCl" type="number" min="1" max="200" step="1"
+                  (blur)="onInputBlur()"
                   class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400" />
               </div>
             </div>
