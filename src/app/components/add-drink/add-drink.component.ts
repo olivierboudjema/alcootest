@@ -44,18 +44,18 @@ interface DrinkCategory {
       <div class="flex-1 min-h-0 overflow-y-auto px-4" style="-webkit-overflow-scrolling: touch" id="addDrinkScroll">
 
         <!-- 4 boutons catégorie -->
-        <div class="max-w-md mx-auto mb-4 grid grid-cols-2 gap-3">
+        <div class="max-w-md mx-auto mb-4 grid grid-cols-4 gap-2">
           @for (cat of categories; track cat.key) {
             <button
               (click)="toggleCategory(cat.key)"
-              class="p-4 rounded-xl border text-white flex flex-col items-center gap-1.5 transition-all"
+              class="p-2 rounded-xl border text-white flex flex-col items-center gap-1 transition-all"
               [ngClass]="openCategory() === cat.key
                 ? 'bg-yellow-400/20 border-yellow-400 ring-2 ring-yellow-400'
                 : 'bg-gradient-to-br from-blue-600/30 to-purple-600/30 border-blue-500/20 hover:from-blue-600/50 hover:to-purple-600/50'"
             >
-              <span class="text-4xl">{{ cat.emoji }}</span>
-              <span class="font-bold text-base">{{ cat.label }}</span>
-              <span class="text-xs text-gray-400">{{ (drinksByCategory[cat.key] || []).length }} référence(s)</span>
+              <span class="text-3xl">{{ cat.emoji }}</span>
+              <span class="font-bold text-sm">{{ cat.label }}</span>
+              <span class="text-xs text-gray-400">{{ (drinksByCategory[cat.key] || []).length }}</span>
             </button>
           }
         </div>
