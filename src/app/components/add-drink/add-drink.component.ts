@@ -95,7 +95,6 @@ interface DrinkCategory {
                 class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400">
                 <option value="cocktail">🍹 Cocktail</option>
                 <option value="vin">🍷 Vin</option>
-                <option value="champagne">🍷 Champagne</option>
                 <option value="biere">🍺 Bière</option>
                 <option value="shot">🔥 Shot</option>
               </select>
