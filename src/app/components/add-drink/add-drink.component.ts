@@ -7,6 +7,7 @@ import {
   PLATFORM_ID,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../../services/supabase.service';
 import { StorageService } from '../../services/storage.service';
@@ -22,7 +23,7 @@ interface DrinkCategory {
 @Component({
   selector: 'app-add-drink',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col overflow-hidden"
          style="height: 100dvh; padding-top: max(0.75rem, env(safe-area-inset-top)); padding-bottom: env(safe-area-inset-bottom)">
@@ -44,7 +45,7 @@ interface DrinkCategory {
       <div class="flex-1 min-h-0 overflow-y-auto px-4" style="-webkit-overflow-scrolling: touch" id="addDrinkScroll">
 
         <!-- 4 boutons catégorie -->
-        <div class="max-w-md mx-auto mb-4 grid grid-cols-4 gap-2">
+        <div class="max-w-md mx-auto mb-2 grid grid-cols-4 gap-2">
           @for (cat of categories; track cat.key) {
             <button
               (click)="toggleCategory(cat.key)"
@@ -60,7 +61,67 @@ interface DrinkCategory {
           }
         </div>
 
-        <!-- Accordéon: catalogue de la catégorie ouverte (scrollable) -->
+        <!-- Bouton verre personnalisé -->
+        @if (newDrink() === null && editingDrink() === null) {
+          <div class="max-w-md mx-auto mb-4">
+            <button (click)="toggleCustomForm()"
+              class="w-full py-2.5 rounded-xl border text-sm font-semibold transition-all flex items-center justify-center gap-2"
+              [ngClass]="showCustomForm()
+                ? 'bg-purple-500/20 border-purple-400 ring-2 ring-purple-400 text-purple-300'
+                : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-white'">
+              🎨 Verre personnalisé
+            </button>
+          </div>
+        }
+
+        <!-- Formulaire verre personnalisé -->
+        @if (showCustomForm() && newDrink() === null && editingDrink() === null) {
+          <div class="max-w-md mx-auto mb-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-xl border border-purple-500/30 p-4 space-y-3 text-white">
+
+            <div class="text-sm font-semibold text-purple-300 mb-1">Définir un verre</div>
+
+            <!-- Nom -->
+            <div>
+              <label class="text-xs text-gray-400 block mb-1">Nom</label>
+              <input [(ngModel)]="customNom" type="text" placeholder="Ex: Mojito maison"
+                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-400" />
+            </div>
+
+            <!-- Type -->
+            <div>
+              <label class="text-xs text-gray-400 block mb-1">Catégorie</label>
+              <select [(ngModel)]="customType"
+                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400">
+                <option value="cocktail">🍹 Cocktail</option>
+                <option value="vin">🍷 Vin</option>
+                <option value="champagne">🍷 Champagne</option>
+                <option value="biere">🍺 Bière</option>
+                <option value="shot">🔥 Shot</option>
+              </select>
+            </div>
+
+            <!-- Degré + Quantité -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-gray-400 block mb-1">Degré d'alcool (%)</label>
+                <input [(ngModel)]="customDegre" type="number" min="0" max="100" step="0.5"
+                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400" />
+              </div>
+              <div>
+                <label class="text-xs text-gray-400 block mb-1">Quantité (cL)</label>
+                <input [(ngModel)]="customQuantiteCl" type="number" min="1" max="200" step="1"
+                  class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-400" />
+              </div>
+            </div>
+
+            <button (click)="startCustomDrink()" [disabled]="!customNom.trim()"
+              class="w-full bg-purple-500 hover:bg-purple-400 disabled:opacity-40 text-white py-2.5 rounded-lg font-bold text-sm transition">
+              → Choisir l'heure
+            </button>
+          </div>
+        }
+
+        <!-- Accordéon: catalogue de la catégorie ouverte -->
         @if (openCategory() !== null && newDrink() === null && editingDrink() === null) {
           <div class="max-w-md mx-auto mb-4 rounded-xl border border-blue-500/20 overflow-hidden">
             <div class="overflow-y-auto max-h-52">
@@ -217,6 +278,13 @@ export class AddDrinkComponent implements OnInit {
   editingDrink = signal<ConsommationAlcool | null>(null);
   isLoading = signal(false);
 
+  // Formulaire verre personnalisé
+  showCustomForm = signal(false);
+  customNom = '';
+  customType: Alcool['type'] = 'cocktail';
+  customDegre = 40;
+  customQuantiteCl = 4;
+
   // Jour sélectionné (minuit local) et minutes depuis minuit (0–1439)
   selectedDay = signal<Date>(this.todayMidnight());
   sliderValue = signal(0);
@@ -274,6 +342,7 @@ export class AddDrinkComponent implements OnInit {
 
   toggleCategory(key: string) {
     this.clearPicker();
+    this.showCustomForm.set(false);
     this.openCategory.set(this.openCategory() === key ? null : key);
   }
 
@@ -283,6 +352,31 @@ export class AddDrinkComponent implements OnInit {
     this.selectedDay.set(this.todayMidnight());
     this.sliderValue.set(this.nowMinutes());
     this.openCategory.set(null);
+    this.showCustomForm.set(false);
+  }
+
+  // ─── Verre personnalisé ───────────────────────────────────────
+
+  toggleCustomForm() {
+    const next = !this.showCustomForm();
+    this.clearPicker();
+    this.openCategory.set(null);
+    this.showCustomForm.set(next);
+  }
+
+  startCustomDrink() {
+    if (!this.customNom.trim()) return;
+    const drink: Alcool = {
+      id: -1, // sentinel : pas encore en DB
+      nom: this.customNom.trim(),
+      type: this.customType,
+      degre: this.customDegre,
+      quantite: this.customQuantiteCl * 10, // cL → mL
+    };
+    this.newDrink.set(drink);
+    this.selectedDay.set(this.todayMidnight());
+    this.sliderValue.set(this.nowMinutes());
+    this.showCustomForm.set(false);
   }
 
   // ─── Liste des verres consommés ───────────────────────────────
@@ -290,6 +384,7 @@ export class AddDrinkComponent implements OnInit {
   startEditDrink(drink: ConsommationAlcool) {
     this.newDrink.set(null);
     this.openCategory.set(null);
+    this.showCustomForm.set(false);
     const d = drink.heure_consomation;
     this.selectedDay.set(new Date(d.getFullYear(), d.getMonth(), d.getDate()));
     this.sliderValue.set(d.getHours() * 60 + d.getMinutes());
@@ -351,7 +446,16 @@ export class AddDrinkComponent implements OnInit {
         );
         this.clearPicker();
       } else if (this.newDrink() !== null && soireeIdStr) {
-        await this.supabase.addDrink(this.newDrink()!.id, Number(soireeIdStr), heure);
+        let drink = this.newDrink()!;
+
+        // Verre personnalisé : l'insérer d'abord dans le catalogue
+        if (drink.id === -1) {
+          drink = await this.supabase.createCustomDrink(
+            drink.nom, drink.type, drink.degre, drink.quantite
+          );
+        }
+
+        await this.supabase.addDrink(drink.id, Number(soireeIdStr), heure);
         const updated = await this.supabase.getDrinksBySoiree(Number(soireeIdStr));
         this.consumedDrinks.set(
           [...updated].sort((a, b) => a.heure_consomation.getTime() - b.heure_consomation.getTime())

@@ -112,6 +112,17 @@ export class SupabaseService {
         return data || [];
     }
 
+    async createCustomDrink(nom: string, type: Alcool['type'], degre: number, quantite: number): Promise<Alcool> {
+        const { data, error } = await this.supabase
+            .from('alcool')
+            .insert([{ nom, type, degre, quantite }])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
     // CONSOMMATIONS (soiree_alcool)
     async addDrink(
         alcool_id: number,
