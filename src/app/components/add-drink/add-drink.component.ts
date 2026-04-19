@@ -84,6 +84,7 @@ interface DrinkCategory {
             <div>
               <label class="text-xs text-gray-400 block mb-1">Nom</label>
               <input [(ngModel)]="customNom" type="text" placeholder="Ex: Mojito maison"
+                (blur)="onInputBlur()"
                 class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-400" />
             </div>
 
@@ -492,6 +493,15 @@ export class AddDrinkComponent implements OnInit {
       'spiritueux pur': '🥃', biere: '🍺', shot: '🔥',
     };
     return map[type] ?? '🍶';
+  }
+
+  onInputBlur() {
+    // iOS : après fermeture du clavier, le viewport reste décalé vers le haut
+    setTimeout(() => {
+      window.scrollTo({ top: 0 });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, 150);
   }
 
   private todayMidnight(): Date {
