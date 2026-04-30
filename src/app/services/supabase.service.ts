@@ -79,6 +79,16 @@ export class SupabaseService {
         return data;
     }
 
+    async searchUsernames(query: string): Promise<string[]> {
+        const { data, error } = await this.supabase
+            .from('profiles')
+            .select('username')
+            .ilike('username', `%${query}%`)
+            .limit(6);
+        if (error) throw error;
+        return (data || []).map((p: any) => p.username);
+    }
+
     async getSoireesByCreator(creator: string): Promise<Soiree[]> {
         const { data, error } = await this.supabase
             .from('soiree')

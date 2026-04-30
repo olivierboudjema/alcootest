@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject, signal, PLATFORM_ID, computed } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -95,8 +95,22 @@ import { Soiree } from '../../models/types';
           @if (showLoadSoiree) {
             <h2 class="text-white text-xl font-bold mb-4">Charger une soirée</h2>
 
-            <input [(ngModel)]="searchUsername" placeholder="Entrez un pseudo"
-              class="w-full px-3 py-2 bg-slate-700 text-white placeholder-gray-400 rounded border border-slate-600 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            <!-- Champ pseudo avec autocomplete -->
+            <div class="relative mb-3">
+              <input [(ngModel)]="searchUsername" (input)="onSearchInput()" (blur)="hideSuggestionsDelayed()"
+                placeholder="Entrez un pseudo"
+                class="w-full px-3 py-2 bg-slate-700 text-white placeholder-gray-400 rounded border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              @if (suggestions().length > 0) {
+                <div class="absolute left-0 right-0 top-full mt-1 bg-slate-700 border border-slate-500 rounded-lg overflow-hidden z-10 shadow-lg">
+                  @for (name of suggestions(); track name) {
+                    <button (mousedown)="pickSuggestion(name)"
+                      class="w-full px-3 py-2.5 text-left text-white text-sm hover:bg-slate-600 border-b border-slate-600 last:border-b-0 transition">
+                      {{ name }}
+                    </button>
+                  }
+                </div>
+              }
+            </div>
 
             <button (click)="loadSoirees()" class="w-full bg-blue-500 text-white py-3 rounded-lg font-bold mb-3">Chercher</button>
 
@@ -154,7 +168,9 @@ export class HomeComponent implements OnInit {
   showInstallButton = signal(false);
   showIosInstructions = signal(false);
   showIosModal = signal(false);
+  suggestions = signal<string[]>([]);
   private installPrompt: any = null;
+  private searchTimer: any = null;
 
   private supabase = inject(SupabaseService);
   private storage = inject(StorageService);
@@ -289,6 +305,27 @@ export class HomeComponent implements OnInit {
 
       alert(`❌ Erreur: ${errorMsg}\n\n⚠️ Vérifiez que:\n1. Les credentials Supabase sont corrects dans environment.ts\n2. Les tables Supabase ont été créées\n3. Votre connexion Internet fonctionne`);
     }
+  }
+
+  onSearchInput() {
+    clearTimeout(this.searchTimer);
+    const q = this.searchUsername.trim();
+    if (q.length < 2) { this.suggestions.set([]); return; }
+    this.searchTimer = setTimeout(async () => {
+      const results = await this.supabase.searchUsernames(q);
+      this.suggestions.set(results);
+      this.cdr.markForCheck();
+    }, 250);
+  }
+
+  pickSuggestion(name: string) {
+    this.searchUsername = name;
+    this.suggestions.set([]);
+    this.loadSoirees();
+  }
+
+  hideSuggestionsDelayed() {
+    setTimeout(() => this.suggestions.set([]), 200);
   }
 
   async loadSoirees() {
